@@ -18,6 +18,7 @@ public class Game extends JGameGUI {
 
     /**
      * Called before the window is displayed
+     * This can be used to set the FPS using g.setFPS and add Elements
      */
     @Override
     public void init(JGameGUI g) {
@@ -26,6 +27,16 @@ public class Game extends JGameGUI {
         g.addElement(defaultElement);
     }
 
+    /**
+     * <p>Called before the GUI is updated each frame and can be used to update Element positions.
+     * This is invoked <b><i>before</i></b> before
+     * any animations defined in {@link Element#setAnimation(Animation)}</p>
+     * <p>The more preferable alternative to overriding this is using the animating API
+     * included with {@link Element#setAnimation}, however, this creates a more simplistic approach
+     * for learners and backwards compatibility with previous teaching games.</p>
+     *
+     * @param gui The JGameGUI instance that is updating
+     */
     @Override
     protected void onScreenUpdate(JGameGUI gui) {
         defaultElement.setxOrig(defaultElement.getxOrig() + 1);

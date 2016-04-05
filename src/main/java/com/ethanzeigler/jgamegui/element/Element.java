@@ -1,5 +1,7 @@
 package com.ethanzeigler.jgamegui.element;
 
+import com.ethanzeigler.jgamegui.animation.Animation;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,9 +9,10 @@ import java.awt.*;
  * Created by ethanzeigler on 2/24/16.
  */
 public class Element implements Comparable {
-    private Image img;
-    private double xOrig, yOrig;
+    protected Image img;
+    protected double xOrig, yOrig;
     private int priority;
+    protected Animation animation;
 
     public Element(String resPath, double xOrig, double yOrig, int priority) {
         setImg(resPath);
@@ -20,6 +23,7 @@ public class Element implements Comparable {
 
     /**
      * Gets the Image of the Element
+     *
      * @return Image displayed by the Element
      */
     public Image getImg() {
@@ -28,6 +32,7 @@ public class Element implements Comparable {
 
     /**
      * Sets the Image of the Element
+     *
      * @param img Image to set
      */
     public void setImg(Image img) {
@@ -36,6 +41,7 @@ public class Element implements Comparable {
 
     /**
      * Sets the Image to display from the given file
+     *
      * @param filePath Path to file to display
      */
     public void setImg(String filePath) {
@@ -44,6 +50,7 @@ public class Element implements Comparable {
 
     /**
      * Gets the x origin of the Element. The origin is the top left corner.
+     *
      * @return The x origin of the Element
      */
     public double getxOrig() {
@@ -52,6 +59,7 @@ public class Element implements Comparable {
 
     /**
      * Sets the x origin of the Element. The origin is in the top left corner.
+     *
      * @param xOrig The origin to set
      */
     public void setxOrig(double xOrig) {
@@ -60,6 +68,7 @@ public class Element implements Comparable {
 
     /**
      * Gets the y origin of the Element. The origin is the top left corner.
+     *
      * @return The y origin of the Element
      */
     public double getyOrig() {
@@ -68,6 +77,7 @@ public class Element implements Comparable {
 
     /**
      * Sets the y origin of the Element. The origin is in the top left corner.
+     *
      * @param yOrig The y origin to set
      */
     public void setyOrig(double yOrig) {
@@ -76,6 +86,7 @@ public class Element implements Comparable {
 
     /**
      * Gets the drawing priority of the element. The smaller the number, the later the Element will be drawn.
+     *
      * @return The drawing priority of the Element
      */
     public int getPriority() {
@@ -84,6 +95,7 @@ public class Element implements Comparable {
 
     /**
      * Gets the drawing priority of the element. The smaller the number, the later the Element will be drawn.
+     *
      * @param priority
      */
     public void setPriority(int priority) {
@@ -92,20 +104,29 @@ public class Element implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        if(o instanceof Element) throw new ClassCastException(
+        if (o instanceof Element) return priority - ((Element) o).priority;
+        else throw new ClassCastException(
                 "Param Object cannot be cast to com.ethanzeigler.jgamegui.Element");
-        return priority - ((Element)o).priority;
+
     }
 
     /**
      * Draws the {@link Element} to the {@link Graphics} object.
+     *
      * @param g Graphics to draw to
      */
     public void paint(Graphics g) {
-        g.drawImage(img, (int)xOrig, (int)yOrig, null);
+        g.drawImage(img, (int) xOrig, (int) yOrig, null);
     }
 
-    public void tick(int totalTicks) {
+    public void runTick(long totalTicks) {
+        if (animation != null) {
+            boolean doCancel = animation.update(this);
+            if (doCancel) this.animation = null;
+        }
+    }
 
+    public void setAnimation(Animation animation) {
+        this.animation = animation;
     }
 }
