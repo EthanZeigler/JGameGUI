@@ -1,49 +1,52 @@
 package com.ethanzeigler.jgamegui;
 
 
+import com.ethanzeigler.jgamegui.animation.Animation;
+import com.ethanzeigler.jgamegui.element.ButtonElement;
 import com.ethanzeigler.jgamegui.element.Element;
 
 import javax.swing.*;
+import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * Created by ethanzeigler on 2/23/16.
  */
-public abstract class JGameGUI extends JFrame implements KeyListener, MouseListener, MouseMotionListener {
+public abstract class JGameGUI extends JFrame implements MouseListener, MouseMotionListener, KeyListener {
+    private List<Element> elements = new ArrayList<>();
     private Thread animator;
-    private int tickCount;
     private int width, height, frameDelay = 30;
     private boolean threadStop;
-
-    List<Element> elements = new ArrayList<>();
+    private long tickCount = 1;
 
     /**
-     * Creates a new <code>JPanel</code> with <code>FlowLayout</code>
-     * and the specified buffering strategy.
-     * If <code>isDoubleBuffered</code> is true, the <code>JPanel</code>
-     * will use a double buffer.
-     *
-     * @param isDoubleBuffered a boolean, true for double-buffering, which
-     *                         uses additional memory space to achieve fast, flicker-free
-     *                         updates
-     */
+     * Creates a new JGameGUI and immediately begins to start the frame.
+     **/
     public JGameGUI(int width, int height) {
-        super();
-        animator = new Thread(() -> {
-            while(!threadStop) {
-                try {
-                    long preMills = System.currentTimeMillis();
-                    repaint();
-                    long sleepMills = (frameDelay + preMills) - System.currentTimeMillis();
-                    // if additional frame time is necessary, sleep
-                    if(sleepMills > 1) Thread.sleep(sleepMills);
 
-                } catch(Exception e) {
+        //<editor-fold desc="Window setup">
+        super();
+        this.width = width;
+        this.height = height;
+        setResizable(false);
+        animator = new Thread(() -> {
+            while (!threadStop) {
+                try {
+                    // determine time before screen update math
+                    long preMills = System.currentTimeMillis(); // time before update math
+                    onScreenUpdate(this); // invoke user edits on a tick
+                    onTick(); // invoke animations and other updates handled by API
+                    repaint(); // tell JFrame to update screen and call paint w/ thread safety
+                    long sleepMills = (frameDelay + preMills) - System.currentTimeMillis(); // time after math
+                    if (sleepMills > 1) Thread.sleep(sleepMills); // if additional frame time is necessary, sleep
+
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -52,9 +55,17 @@ public abstract class JGameGUI extends JFrame implements KeyListener, MouseListe
         this.width = width;
         this.height = height;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        init(this);
+        setBackground(Color.WHITE);
         setSize(width, height);
 
+        //</editor-fold>
+
+        // calls the implementing class's init method
+        init(this);
+
+        setSize(width, height);
+
+        // add listener for window closing
         addWindowListener(new WindowAdapter() {
             /**
              * Invoked when a window has been closed.
@@ -70,42 +81,58 @@ public abstract class JGameGUI extends JFrame implements KeyListener, MouseListe
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
-                /*TODO debug print*/ System.out.println("Window closed");
+                /*TODO debug print*/
+                System.out.println("Window closed");
                 deinit();
             }
         });
+
+        // focus to receive key strokes
+        setFocusable(true);
+        requestFocus();
+
+        // register listeners
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        addKeyListener(this);
+
+        // begin animation and make visible
         setVisible(true);
         animator.start();
-        /*TODO debug print*/ System.out.println(animator + "Init");
     }
 
     /**
      * Called before the window is displayed
      */
-    public abstract void init(JGameGUI g);
+    protected abstract void init(JGameGUI g);
 
     /**
      * Called when the VM is being disabled. This method can be used to dispose of any variables or save data.
      */
-    public void deinit() {
+    protected void deinit() {
 
     }
 
     /**
      * Adds the Element into the GUI
+     *
      * @param ie Element to add
      */
     public void addElement(Element ie) {
         elements.add(ie);
+        updateDrawPriorities();
     }
 
     /**
      * Removes the Element from the GUI.
+     *
      * @param ie Element to remove
      * @return true if Element was removed from the list of Elements
      */
     public boolean removeElement(Element ie) {
-        return elements.remove(ie);
+        boolean returnBool = elements.remove(ie);
+        updateDrawPriorities();
+        return returnBool;
     }
 
     /**
@@ -122,7 +149,6 @@ public abstract class JGameGUI extends JFrame implements KeyListener, MouseListe
     public void updateDrawPriorities() {
         Collections.sort(elements);
     }
-
 
 
     /**
@@ -148,15 +174,40 @@ public abstract class JGameGUI extends JFrame implements KeyListener, MouseListe
      */
     @Override
     public void paint(Graphics g) {
+        // create buffer to prevent issues with windows
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D bufferGraphic = bufferedImage.createGraphics();
+        Graphics2D g2dComponent = (Graphics2D) g;
+        super.paint(bufferGraphic);
+        elements.stream().forEachOrdered(e -> e.paint(bufferGraphic));
         ++tickCount;
-        elements.stream().forEachOrdered(e -> e.paint(g));
-        if(tickCount % 60 == 0) {
-            System.out.println(tickCount);
-        }
+        g.drawImage(bufferedImage, 0, 0, null);
+    }
+
+    /**
+     * Backend method for delegating actions to be taken on a tick update.
+     */
+    private void onTick() {
+        elements.stream().forEach(element -> element.runTick(tickCount));
+    }
+
+    /**
+     * <p>Called before the GUI is updated each frame and can be used to update Element positions.
+     * This is invoked <i><s>before</s></i> {@link JGameGUI#onScreenUpdate(JGameGUI)} and before
+     * any animations defined in {@link Element#setAnimation(Animation)}</p>
+     * <p>The more preferable alternative to overriding this is using the animating API
+     * included with {@link Element#setAnimation}, however, this creates a more simplistic approach
+     * for learners and backwards compatibility with previous teaching games.</p>
+     *
+     * @param gui The JGameGUI instance that is updating
+     */
+    protected void onScreenUpdate(JGameGUI gui) {
+
     }
 
     /**
      * Sets the desired Frames Per Second. If the calculations needed to update a frame
+     *
      * @param frames The number of frames per second desired.
      */
     public void setFPS(int frames) {
@@ -164,41 +215,6 @@ public abstract class JGameGUI extends JFrame implements KeyListener, MouseListe
     }
 
 
-    /**
-     * Invoked when a key has been typed.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key typed event.
-     *
-     * @param e
-     */
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    /**
-     * Invoked when a key has been pressed.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key pressed event.
-     *
-     * @param e
-     */
-    @Override
-    public void keyPressed(KeyEvent e) {
-
-    }
-
-    /**
-     * Invoked when a key has been released.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key released event.
-     *
-     * @param e
-     */
-    @Override
-    public void keyReleased(KeyEvent e) {
-
-    }
 
     /**
      * Invoked when the mouse button has been clicked (pressed
@@ -207,8 +223,10 @@ public abstract class JGameGUI extends JFrame implements KeyListener, MouseListe
      * @param e
      */
     @Override
-    public void mouseClicked(MouseEvent e) {
-
+    public final void mouseClicked(MouseEvent e) {
+        elements.stream().filter(element -> element instanceof ButtonElement)
+                .filter(element1 -> ((ButtonElement) element1).isClicked(e.getX(), e.getY()))
+                .sequential().limit(1).forEach(element2 -> ((ButtonElement)element2).onClick());
     }
 
     /**
@@ -278,5 +296,42 @@ public abstract class JGameGUI extends JFrame implements KeyListener, MouseListe
     @Override
     public void mouseMoved(MouseEvent e) {
 
+    }
+
+
+    /**
+     * Invoked when a key has been typed.
+     * See the class description for {@link KeyEvent} for a definition of
+     * a key typed event.
+     *
+     * @param e
+     */
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    /**
+     * Invoked when a key has been pressed.
+     * See the class description for {@link KeyEvent} for a definition of
+     * a key pressed event.
+     *
+     * @param e
+     */
+    @Override
+    public void keyPressed(KeyEvent e) {
+        System.out.println("Press: " + e.getKeyChar());
+    }
+
+    /**
+     * Invoked when a key has been released.
+     * See the class description for {@link KeyEvent} for a definition of
+     * a key released event.
+     *
+     * @param e
+     */
+    @Override
+    public void keyReleased(KeyEvent e) {
+        System.out.println("Release: " + e.getKeyChar());
     }
 }

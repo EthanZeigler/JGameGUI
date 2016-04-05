@@ -10,9 +10,9 @@ public interface AnimationRunnable {
     /**
      * Called when an animation needs to be updated.
      * @param numOfTicks
-     * @param numOfTicksRemaining
-     * @param vector
      * @param element
+     * @return whether or not the animation should terminate. If true, {@link Element}'s animation field
+     * will become null.
      */
-    void onUpdate(int numOfTicks, int numOfTicksRemaining, Element element);
+    boolean onUpdate(int numOfTicks, Element element);
 }

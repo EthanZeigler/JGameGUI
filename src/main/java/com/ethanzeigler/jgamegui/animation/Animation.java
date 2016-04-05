@@ -6,6 +6,10 @@ import com.ethanzeigler.jgamegui.element.Element;
  * Created by ethanzeigler on 2/26/16.
  */
 public class Animation {
+    private Vector vector;
+    private AnimationRunnable runnable;
+    private int totalTicks;
+    private int currentTicks;
 
     /**
      * Creates a new animation that will follow the Vector path set. The Vector is mutable at runtime.
@@ -18,22 +22,23 @@ public class Animation {
         this.totalTicks = totalTicks;
     }
 
-    public Animation(AnimationRunnable runnable, int totalTicks) {
+    public Animation(AnimationRunnable runnable) {
         this.runnable = runnable;
     }
 
-    Vector vector;
-    AnimationRunnable runnable;
-    int totalTicks;
-    int currentTicks;
-
-    void update(Element element) {
+    /**
+     * Invoked when the next frame of the animation runs
+     * @param element Element that the animation belongs to
+     * @return Whether the animation should be terminated
+     */
+    public boolean update(Element element) {
+        currentTicks++;
         if(vector == null) {
-            runnable.onUpdate(currentTicks, totalTicks, element);
+            return runnable.onUpdate(currentTicks, element);
         } else {
             element.setxOrig(element.getxOrig() + vector.getHorizontalMagnitude());
             element.setyOrig(element.getyOrig() + vector.getVerticalMagnitude());
+            return totalTicks <= currentTicks;
         }
-        currentTicks++;
     }
 }

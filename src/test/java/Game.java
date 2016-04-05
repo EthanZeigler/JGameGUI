@@ -1,12 +1,16 @@
 import com.ethanzeigler.jgamegui.JGameGUI;
+import com.ethanzeigler.jgamegui.animation.Animation;
+import com.ethanzeigler.jgamegui.animation.Vector;
+import com.ethanzeigler.jgamegui.element.ButtonElement;
 import com.ethanzeigler.jgamegui.element.Element;
 
 /**
  * Created by ethanzeigler on 3/3/16.
  */
 public class Game extends JGameGUI {
-    public static final int WIDTH = 100;
-    public static final int HEIGHT = 100;
+    public static final int WIDTH = 1000;
+    public static final int HEIGHT = 1000;
+    Element defaultElement;
 
     public Game() {
         super(WIDTH, HEIGHT);
@@ -18,13 +22,14 @@ public class Game extends JGameGUI {
     @Override
     public void init(JGameGUI g) {
         g.setFPS(60);
-        System.out.println("Started");
-        Element element = new Element("/oie_l4ipM7cChF7M.png", 30, 30, 1);
-        g.addElement(element);
+        defaultElement = new Element("/piq_311577_400x400.png", 0, 0, 2);
+        g.addElement(defaultElement);
     }
 
-    public void onUpdate(JGameGUI g) {
-
+    @Override
+    protected void onScreenUpdate(JGameGUI gui) {
+        defaultElement.setxOrig(defaultElement.getxOrig() + 1);
+        defaultElement.setyOrig(defaultElement.getyOrig() + 1);
     }
 
     /**
