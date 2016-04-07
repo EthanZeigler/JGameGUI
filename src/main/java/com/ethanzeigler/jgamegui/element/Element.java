@@ -13,9 +13,17 @@ public class Element implements Comparable {
     protected double xOrig, yOrig;
     private int priority;
     protected Animation animation;
+    private boolean isVisible = true;
 
     public Element(String resPath, double xOrig, double yOrig, int priority) {
         setImg(resPath);
+        this.xOrig = xOrig;
+        this.yOrig = yOrig;
+        this.priority = priority;
+    }
+
+    public Element(ImageIcon icon, double xOrig, double yOrig, int priority) {
+        setImg(icon);
         this.xOrig = xOrig;
         this.yOrig = yOrig;
         this.priority = priority;
@@ -40,6 +48,15 @@ public class Element implements Comparable {
     }
 
     /**
+     * Sets the Image of the Element
+     *
+     * @param img Image to set
+     */
+    public void setImg(ImageIcon img) {
+        this.img = img.getImage();
+    }
+
+    /**
      * Sets the Image to display from the given file
      *
      * @param filePath Path to file to display
@@ -47,6 +64,7 @@ public class Element implements Comparable {
     public void setImg(String filePath) {
         this.img = new ImageIcon(this.getClass().getResource(filePath)).getImage();
     }
+
 
     /**
      * Gets the x origin of the Element. The origin is the top left corner.
@@ -128,5 +146,21 @@ public class Element implements Comparable {
 
     public void setAnimation(Animation animation) {
         this.animation = animation;
+    }
+
+    /**
+     * Gets whether or not the Element is currently visible
+     * @return whether the Element is visible
+     */
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    /**
+     * Sets whether or not the Element is visible
+     * @param isVisible whether or not the Element is visible
+     */
+    public void setVisible(boolean isVisible) {
+        this.isVisible = isVisible;
     }
 }

@@ -11,7 +11,7 @@ public interface AnimationRunnable {
      * Called when an animation needs to be updated.
      * @param numOfTicks
      * @param element
-     * @return wether to retain the animation. True continues to run. False stops running.
+     * @return whether or not to retain the animation. True continues to run. False stops running.
      */
     boolean onUpdate(int numOfTicks, Element element);
 }

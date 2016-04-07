@@ -1,5 +1,7 @@
 package com.ethanzeigler.jgamegui.element;
 
+import javax.swing.*;
+
 /**
  * Created by ethanzeigler on 4/5/16.
  */
@@ -10,6 +12,12 @@ public class CollidableElement extends Element implements SizedElement {
         super(resPath, xOrig, yOrig, priority);
         this.height = height;
         this.width = width;
+    }
+
+    public CollidableElement(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
+        super(icon, xOrig, yOrig, priority);
+        this.width = width;
+        this.height = height;
     }
 
     @Override
