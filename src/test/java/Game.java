@@ -1,8 +1,10 @@
 import com.ethanzeigler.jgamegui.JGameGUI;
 import com.ethanzeigler.jgamegui.animation.Animation;
 import com.ethanzeigler.jgamegui.animation.Vector;
-import com.ethanzeigler.jgamegui.element.ButtonElement;
-import com.ethanzeigler.jgamegui.element.Element;
+import com.ethanzeigler.jgamegui.element.ImageElement;
+import com.ethanzeigler.jgamegui.element.TextElement;
+
+import java.awt.*;
 
 /**
  * Created by ethanzeigler on 3/3/16.
@@ -10,7 +12,7 @@ import com.ethanzeigler.jgamegui.element.Element;
 public class Game extends JGameGUI {
     public static final int WIDTH = 1000;
     public static final int HEIGHT = 1000;
-    Element defaultElement;
+    TextElement e;
 
     public Game() {
         super(WIDTH, HEIGHT);
@@ -22,25 +24,26 @@ public class Game extends JGameGUI {
      */
     @Override
     public void init(JGameGUI g) {
-        g.setFPS(60);
-        defaultElement = new Element("/piq_311577_400x400.png", 0, 0, 2);
-        g.addElement(defaultElement);
+        g.setFPS(50);
+        e = new TextElement(0, 100, 1, "This is text");
+        e.setAnimation(new Animation(new Vector(1,1), 500));
+        e.setFontSize(50);
+        e.setColor(Color.RED);
+        g.addElement(e);
     }
 
     /**
-     * <p>Called before the GUI is updated each frame and can be used to update Element positions.
+     * <p>Called before the GUI is updated each frame and can be used to update ImageElement positions.
      * This is invoked <b><i>before</i></b> before
-     * any animations defined in {@link Element#setAnimation(Animation)}</p>
+     * any animations defined in {@link ImageElement#setAnimation(Animation)}</p>
      * <p>The more preferable alternative to overriding this is using the animating API
-     * included with {@link Element#setAnimation}, however, this creates a more simplistic approach
+     * included with {@link ImageElement#setAnimation}, however, this creates a more simplistic approach
      * for learners and backwards compatibility with previous teaching games.</p>
      *
      * @param gui The JGameGUI instance that is updating
      */
     @Override
     protected void onScreenUpdate(JGameGUI gui) {
-        defaultElement.setxOrig(defaultElement.getxOrig() + 1);
-        defaultElement.setyOrig(defaultElement.getyOrig() + 1);
     }
 
     /**

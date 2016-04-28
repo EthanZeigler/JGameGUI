@@ -12,13 +12,19 @@ import java.awt.geom.Rectangle2D;
  return (getMinumumX() >= collidable.getMaximumX()
  */
 public interface Collidable {
-    enum CollidableSide {
+    // to be implemented at a later time
+    /*enum CollidableSide {
         LEFT,
         RIGHT,
         BOTTOM,
         TOP
-    }
+    }*/
 
+    /**
+     * Gets whether the given Collidable is colliding with <i>this</i>
+     * @param collidable
+     * @return
+     */
     default boolean isCollidingWith(Collidable collidable) {
         return  this.getxOrigin() + this.getWidth() <= collidable.getxOrigin() ||       // a is left of b
                 this.getxOrigin() >= collidable.getxOrigin() + collidable.getWidth() || // a is right of b

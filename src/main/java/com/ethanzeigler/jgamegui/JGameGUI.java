@@ -2,28 +2,54 @@ package com.ethanzeigler.jgamegui;
 
 
 import com.ethanzeigler.jgamegui.animation.Animation;
-import com.ethanzeigler.jgamegui.element.ButtonElement;
-import com.ethanzeigler.jgamegui.element.Element;
+import com.ethanzeigler.jgamegui.element.AbstractElement;
+import com.ethanzeigler.jgamegui.element.ButtonImageElement;
+import com.ethanzeigler.jgamegui.element.ImageElement;
+import com.ethanzeigler.jgamegui.sound.AudioClip;
 
 import javax.swing.*;
-import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by ethanzeigler on 2/23/16.
+ * A Java Swing game API designed and created by Ethan Zeigler, class of '16.
+ * How to use this API:
+ * <p>Extend JGameGUI and implement its methods. Create a new main method and create a new object of your class with your desired screen size.
+ * If you received a template from Mr. Ulmer, this has already been done for you and you will change the WIDTH and HEIGHT variables.</p>
+ * <p>When the game starts, init will be invoked. Here, you initialize your variables, set the frame rate using {@link JGameGUI#setFPS(int)}, which can speed up or slow down your game. About 60, which is the default, is good. load image and sound files, and add your Elements to the window stack.</p>
+ * <p>JGameGUI works by the developer adding {@link AbstractElement}s to the window. These elements represent anything that
+ * can be drawn to the screen such as text, images, and buttons. All of these have pre-made objects for you to use.
+ * <p><br>TextElement represents written text.
+ * <br>ImageElement represents a plain ol' image.
+ * <br>ButtonImageElement represents an image as a button. This also requires the image's size as an argument. The image can
+ * also be set to null and set to the size of the screen to detect clicks.
+ * <br>CollidableImageElement has a predefined method for checking to see if two CollidableElements are touching.
+ * </p>
+ * <br><br>Together, these represent your screen. In the init method, create new elements and add them to the screen
+ * using {@link JGameGUI#addElement(AbstractElement)}. {@link Animation}s can be applied to these Elements as well using
+ * the animation API, which is well documented and I will not explain here. Note that this is for late-year AP students only.
+ * First years will not understand this.</p>
+ * <p>What about sound? Use the sound API. Create a new AudioClip in the init method because depending on the size of the file,
+ * it can cause lag spikes when loading. Using {@link AudioClip#playOnce()}, the sound file can be played. Be sure to check out the
+ * other options including {@link AudioClip#playUntilStopped()}, which will play forever until told to stop.
+ * </p>
+ * <p>On each screen update, the onScreenUpdate method ({@link JGameGUI#onScreenUpdate(JGameGUI)} is invoked. Here you
+ * can move your elements around using their set x and y methods, as well as set new animations and image files if necessary. This is the heart of your game.</p>
+ * <p>When the window is closed or you want to end the game, call the {@link JGameGUI#stop()} method which will close the window and shut down the program.
+ * As the program shuts down either by the stop method or the window being closed, the deinit method is called. This can be used to save files or other things you want to do.
+ * It is a good thing to call {@link AudioClip#dispose()}</p>
  */
 public abstract class JGameGUI extends JFrame implements MouseListener, MouseMotionListener, KeyListener {
-    private List<Element> elements = new ArrayList<>();
+    private List<AbstractElement> elements = new ArrayList<>();
     private Thread animator;
     private int width, height, frameDelay = 30;
     private boolean threadStop;
     private long tickCount = 1;
+    private boolean isCloseRequested = false;
 
     /**
      * Creates a new JGameGUI and immediately begins to start the frame.
@@ -40,6 +66,11 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
                 try {
                     // determine time before screen update math
                     long preMills = System.currentTimeMillis(); // time before update math
+                    if(isCloseRequested) {
+                        setVisible(false);
+                        deinit();
+                        break;
+                    }
                     onScreenUpdate(this); // invoke user edits on a tick
                     onTick(); // invoke animations and other updates handled by API
                     repaint(); // tell JFrame to update screen and call paint w/ thread safety
@@ -69,8 +100,6 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         addWindowListener(new WindowAdapter() {
             /**
              * Invoked when a window has been closed.
-             *
-             * @param e
              */
             @Override
             public void windowClosed(WindowEvent e) {
@@ -81,8 +110,6 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
-                /*TODO debug print*/
-                System.out.println("Window closed");
                 deinit();
             }
         });
@@ -114,24 +141,23 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     }
 
     /**
-     * Adds the Element into the GUI
+     * Adds the ImageElement into the GUI
      *
-     * @param ie Element to add
+     * @param e ImageElement to add
      */
-    public void addElement(Element ie) {
-        elements.add(ie);
+    public void addElement(AbstractElement e) {
+        elements.add(e);
         updateDrawPriorities();
     }
 
     /**
-     * Removes the Element from the GUI.
+     * Removes the ImageElement from the GUI.
      *
-     * @param ie Element to remove
-     * @return true if Element was removed from the list of Elements
+     * @param e ImageElement to remove
+     * @return true if ImageElement was removed from the list of Elements
      */
-    public boolean removeElement(Element ie) {
-        boolean returnBool = elements.remove(ie);
-        updateDrawPriorities();
+    public boolean removeElement(AbstractElement e) {
+        boolean returnBool = elements.remove(e);
         return returnBool;
     }
 
@@ -179,7 +205,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         Graphics2D bufferGraphic = bufferedImage.createGraphics();
         Graphics2D g2dComponent = (Graphics2D) g;
         super.paint(bufferGraphic);
-        elements.stream().forEachOrdered(e -> e.paint(bufferGraphic));
+        for (AbstractElement element: elements) element.paint(bufferGraphic);
         ++tickCount;
         g.drawImage(bufferedImage, 0, 0, null);
     }
@@ -192,12 +218,9 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     }
 
     /**
-     * <p>Called before the GUI is updated each frame and can be used to update Element positions.
+     * <p>Called before the GUI is updated each frame and can be used to update ImageElement positions.
      * This is invoked <i><s>before</s></i> {@link JGameGUI#onScreenUpdate(JGameGUI)} and before
-     * any animations defined in {@link Element#setAnimation(Animation)}</p>
-     * <p>The more preferable alternative to overriding this is using the animating API
-     * included with {@link Element#setAnimation}, however, this creates a more simplistic approach
-     * for learners and backwards compatibility with previous teaching games.</p>
+     * any animations defined in {@link ImageElement#setAnimation(Animation)}</p>
      *
      * @param gui The JGameGUI instance that is updating
      */
@@ -214,6 +237,12 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         frameDelay = 1000 / frames;
     }
 
+    /**
+     * Stops the JGameGUI and ends the program. This will subsequently call the deinit method.
+     */
+    public void stop() {
+        isCloseRequested = true;
+    }
 
 
     /**
@@ -224,9 +253,9 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      */
     @Override
     public final void mouseClicked(MouseEvent e) {
-        elements.stream().filter(element -> element instanceof ButtonElement)
-                .filter(element1 -> ((ButtonElement) element1).isClicked(e.getX(), e.getY()))
-                .sequential().limit(1).forEach(element2 -> ((ButtonElement)element2).onClick());
+        elements.stream().filter(element -> element instanceof ButtonImageElement)
+                .filter(element1 -> ((ButtonImageElement) element1).isClicked(e.getX(), e.getY()))
+                .sequential().limit(1).forEach(element2 -> ((ButtonImageElement)element2).onClick());
     }
 
     /**
@@ -237,6 +266,16 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     @Override
     public void mousePressed(MouseEvent e) {
 
+    }
+
+    /**
+     * Loads an image file from the given path. Use this instead of ImageIcon's constructor, as it is
+     * temperamental with files.
+     * @param filePath
+     * @return
+     */
+    public static ImageIcon loadImageFromFile(String filePath) {
+        return new ImageIcon(JGameGUI.class.getResource("/" + filePath));
     }
 
     /**
