@@ -12,7 +12,7 @@ import java.util.List;
  * a clickable area without an image attached to it, the image can be set to null and nothing will be drawn, but the
  * clickable area will still exist.</p>
  */
-public class ButtonImage extends ImageElement implements Sized {
+public class ButtonImageElement extends ImageElement implements Sized {
     private double width, height;
     private List<ButtonClickListener> clickListeners = new ArrayList<>();
 
@@ -25,7 +25,7 @@ public class ButtonImage extends ImageElement implements Sized {
      * @param width the clickable area's width
      * @param height the clickable area's height
      */
-    public ButtonImage(String resPath, double xOrig, double yOrig, int priority, double width, double height) {
+    public ButtonImageElement(String resPath, double xOrig, double yOrig, int priority, double width, double height) {
         this(JGameGUI.loadImageFromFile(resPath), xOrig, yOrig, priority, width, height);
     }
 
@@ -38,7 +38,7 @@ public class ButtonImage extends ImageElement implements Sized {
      * @param width the clickable area's width
      * @param height the clickable area's height
      */
-    public ButtonImage(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
+    public ButtonImageElement(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;

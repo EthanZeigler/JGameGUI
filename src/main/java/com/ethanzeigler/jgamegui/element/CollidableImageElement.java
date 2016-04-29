@@ -6,7 +6,7 @@ import javax.swing.*;
  * An {@link ImageElement} that is extended to allow for a manual check for collisions with other CollidableImageElements using
  * {@link Collidable#isCollidingWith(Collidable)}
  */
-public class CollidableImage extends ImageElement implements Sized {
+public class CollidableImageElement extends ImageElement implements Sized {
     private double height, width;
 
     /**
@@ -18,7 +18,7 @@ public class CollidableImage extends ImageElement implements Sized {
      * @param height the collision area's height
      * @param width the collision area's width
      */
-    public CollidableImage(String resPath, double xOrig, double yOrig, int priority, double height, double width) {
+    public CollidableImageElement(String resPath, double xOrig, double yOrig, int priority, double height, double width) {
         super(resPath, xOrig, yOrig, priority);
         this.height = height;
         this.width = width;
@@ -33,7 +33,7 @@ public class CollidableImage extends ImageElement implements Sized {
      * @param height the collision area's height
      * @param width the collision area's width
      */
-    public CollidableImage(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
+    public CollidableImageElement(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;

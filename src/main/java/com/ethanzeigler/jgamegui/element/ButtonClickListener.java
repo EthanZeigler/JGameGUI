@@ -1,7 +1,7 @@
 package com.ethanzeigler.jgamegui.element;
 
 /**
- * A listener that is designed to be invoked when a ButtonImage is clicked.
+ * A listener that is designed to be invoked when a ButtonImageElement is clicked.
  */
 public interface ButtonClickListener {
     /**
