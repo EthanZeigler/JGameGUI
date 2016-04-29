@@ -5,7 +5,7 @@ import com.sun.javaws.exceptions.InvalidArgumentException;
 import java.awt.*;
 
 /**
- * Created by ethanzeigler on 4/14/16.
+ * An {@link AbstractElement} that represents text drawn on the screen with the lower-right corner of the Element as the drawing origin.
  */
 public class TextElement extends AbstractElement {
     protected String text;

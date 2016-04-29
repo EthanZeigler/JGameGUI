@@ -7,9 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by ethanzeigler on 2/24/16.
+ * Represents a button on the screen with a clickable area defined in the constructor and it's image.
+ * <p>To strictly create
+ * a clickable area without an image attached to it, the image can be set to null and nothing will be drawn, but the
+ * clickable area will still exist.</p>
  */
-public class ButtonImageElement extends ImageElement implements SizedElement {
+public class ButtonImage extends ImageElement implements Sized {
     private double width, height;
     private List<ButtonClickListener> clickListeners = new ArrayList<>();
 
@@ -22,7 +25,7 @@ public class ButtonImageElement extends ImageElement implements SizedElement {
      * @param width the clickable area's width
      * @param height the clickable area's height
      */
-    public ButtonImageElement(String resPath, double xOrig, double yOrig, int priority, double width, double height) {
+    public ButtonImage(String resPath, double xOrig, double yOrig, int priority, double width, double height) {
         this(JGameGUI.loadImageFromFile(resPath), xOrig, yOrig, priority, width, height);
     }
 
@@ -35,7 +38,7 @@ public class ButtonImageElement extends ImageElement implements SizedElement {
      * @param width the clickable area's width
      * @param height the clickable area's height
      */
-    public ButtonImageElement(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
+    public ButtonImage(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;
@@ -45,7 +48,7 @@ public class ButtonImageElement extends ImageElement implements SizedElement {
      * Gets if the given coordinates land within the click area
      * @param x the x coordinate
      * @param y the y coordinate
-     * @return
+     * @return whether or not the button was clicked
      */
     public boolean isClicked(double x, double y) {
         return (x >= xOrig && x <= (width + xOrig)) && (y >= yOrig && y <= (height + yOrig));

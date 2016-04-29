@@ -1,15 +1,7 @@
 package com.ethanzeigler.jgamegui.element;
 
-import java.awt.geom.Rectangle2D;
-
 /**
  * Represents a box that has the ability to collide with other Collidables
- * public boolean intersects(double x, double y, double w, double h) {
-
-
-
- }
- return (getMinumumX() >= collidable.getMaximumX()
  */
 public interface Collidable {
     // to be implemented at a later time
@@ -22,8 +14,8 @@ public interface Collidable {
 
     /**
      * Gets whether the given Collidable is colliding with <i>this</i>
-     * @param collidable
-     * @return
+     * @param collidable the collidable to inspect for collision with
+     * @return whether or not the collidables are colliding
      */
     default boolean isCollidingWith(Collidable collidable) {
         return  this.getxOrigin() + this.getWidth() <= collidable.getxOrigin() ||       // a is left of b
@@ -34,7 +26,7 @@ public interface Collidable {
     }
 
     /**
-     * Gets the orgin x
+     * Gets the origin x
      * @return the x origin
      */
     double getxOrigin();

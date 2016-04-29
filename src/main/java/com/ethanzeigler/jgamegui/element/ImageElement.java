@@ -6,7 +6,9 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by ethanzeigler on 2/24/16.
+ * An Element that draws its image on screen from the top-right corner as the origin. Added to the window stack using
+ * {@link JGameGUI#addElement(AbstractElement)}, it will be drawn to the screen on each update based on the ImageElement's
+ * current x and y origin position. The size of the image drawn is dependent on the size of the image provided.
  */
 public class ImageElement extends AbstractElement {
     protected Image img;
@@ -24,7 +26,7 @@ public class ImageElement extends AbstractElement {
 
     /**
      * Initiates an image element with the given ImageIcon, x origin, y origin, and draw priority.
-     * @param resPath the ImageIcon to draw
+     * @param icon the ImageIcon to draw
      * @param xOrig the x origin
      * @param yOrig the y origin
      * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
@@ -77,6 +79,7 @@ public class ImageElement extends AbstractElement {
      *
      * @param g Graphics to draw to
      */
+    @Override
     public void paint(Graphics g) {
         g.drawImage(img, (int) xOrig, (int) yOrig, null);
     }

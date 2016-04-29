@@ -5,7 +5,10 @@ import com.ethanzeigler.jgamegui.animation.Animation;
 import java.awt.*;
 
 /**
- * Created by ethanzeigler on 4/14/16.
+ * The abstract representation of a screen element drawn in the window. Elements are drawn to the screen with the
+ * upper-right corner of the window as the origin. The drawing origins of Elements vary by their implementation.
+ * <p>Elements can be made visible or invisible by
+ * using {@link AbstractElement#setVisible(boolean)} without removing or adding them from the window stack.</p>
  */
 public abstract class AbstractElement implements Comparable {
     protected double xOrig, yOrig;
@@ -73,7 +76,7 @@ public abstract class AbstractElement implements Comparable {
     /**
      * Gets the drawing priority of the element. The smaller the number, the later the ImageElement will be drawn.
      *
-     * @param priority
+     * @param priority the drawing priority. The larger the number, the later it is drawn and on top of others with lower priorities
      */
     public void setPriority(int priority) {
         this.priority = priority;

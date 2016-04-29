@@ -3,7 +3,8 @@ package com.ethanzeigler.jgamegui.animation;
 import com.ethanzeigler.jgamegui.element.AbstractElement;
 
 /**
- * Created by ethanzeigler on 2/26/16.
+ * A movement animation for {@link AbstractElement}s. Animations are applied on each screen update based on the actions
+ * specified.
  */
 public class Animation {
     /**
@@ -19,9 +20,10 @@ public class Animation {
     /**
      * Creates a new animation that will follow the Vector path set. The Vector is mutable at runtime.
      *
-     * @param vector     The vector that will represent the {@Link ImageElement}'s movement for the given
+     * @param vector     The vector that will represent the {@link com.ethanzeigler.jgamegui.element.ImageElement}'s movement for the given
      *                   amount of ticks
-     * @param totalTicks The total number of ticks (Iterations) the ImageElement ill be moved by the Vector's magnitude
+     * @param totalTicks The total number of ticks (Iterations) the ImageElement will be moved by the Vector's magnitude.
+     *                   Using {@link Animation#INFINITE_TICKS} will never automatically cancel.
      */
     public Animation(Vector vector, long totalTicks) {
         this.vector = vector;
@@ -64,7 +66,7 @@ public class Animation {
         } else {
             element.setxOrig(element.getxOrig() + vector.getHorizontalMagnitude());
             element.setyOrig(element.getyOrig() + vector.getVerticalMagnitude());
-            return totalTicks <= currentTicks;
+            return totalTicks != -1 && totalTicks <= currentTicks;
         }
     }
 

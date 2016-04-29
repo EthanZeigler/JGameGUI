@@ -3,7 +3,7 @@ package com.ethanzeigler.jgamegui.animation;
 import com.ethanzeigler.jgamegui.element.AbstractElement;
 
 /**
- * Created by ethanzeigler on 2/26/16.
+ * A listening runnable invoked when a custom Animation ({@link Animation#Animation(AnimationRunnable)}) needs to be updated.
  */
 public interface AnimationRunnable {
 
