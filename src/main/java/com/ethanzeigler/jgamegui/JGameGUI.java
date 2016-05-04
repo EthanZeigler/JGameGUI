@@ -8,6 +8,7 @@ import com.ethanzeigler.jgamegui.element.ImageElement;
 import com.ethanzeigler.jgamegui.sound.AudioClip;
 
 import javax.swing.*;
+import javax.xml.bind.SchemaOutputResolver;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -49,7 +50,8 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     private int width, height, frameDelay = 30;
     private boolean threadStop;
     private long tickCount = 1;
-    private boolean isCloseRequested = false;
+    private boolean hasProgrammicallyClosed = false;
+    private boolean hasUserClosed = false;
 
     /**
      * Creates a new JGameGUI and immediately begins to start the frame.
@@ -64,23 +66,35 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         animator = new Thread(() -> {
             while (!threadStop) {
                 try {
+                    // System.out.println("Thread stop status: " +threadStop);
                     // determine time before screen update math
                     long preMills = System.currentTimeMillis(); // time before update math
-                    if(isCloseRequested) {
-                        setVisible(false);
-                        deinit();
-                        break;
-                    }
                     onScreenUpdate(this); // invoke user edits on a tick
                     onTick(); // invoke animations and other updates handled by API
                     repaint(); // tell JFrame to update screen and call paint w/ thread safety
-                    long sleepMills = (frameDelay + preMills) - System.currentTimeMillis(); // time after math
-                    if (sleepMills > 1) Thread.sleep(sleepMills); // if additional frame time is necessary, sleep
 
-                } catch (Exception e) {
+                    if (hasProgrammicallyClosed) {
+                        // System.out.println("Close programmatically requested");
+                        setVisible(false);
+                        threadStop = true;
+                        break;
+                    } else if (hasUserClosed) {
+                        // System.out.println("User closed window");
+                        threadStop = true;
+                    }
+
+                    long sleepMills = (frameDelay + preMills) - System.currentTimeMillis(); // time after math
+                    if (sleepMills > 1)
+                        Thread.sleep(sleepMills); // if additional frame time is necessary, sleep
+                } catch (InterruptedException e) {
                     e.printStackTrace();
+                    System.exit(-1);
                 }
             }
+
+            // System.out.println("Animator is terminating");
+            if (hasProgrammicallyClosed)
+                JGameGUI.this.dispose();
         });
         animator.setDaemon(true);
         this.width = width;
@@ -103,14 +117,18 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
              */
             @Override
             public void windowClosed(WindowEvent e) {
-                super.windowClosed(e);
-                threadStop = true;
+                // System.out.println("Window closed");
+                if (!hasProgrammicallyClosed)
+                    hasUserClosed = true;
                 try {
+                    // System.out.println("Thread lock on animator entered");
                     animator.join();
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
+                } finally {
+                    // System.out.println("Animator thread lock ended. Deiniting");
+                    deinit();
                 }
-                deinit();
             }
         });
 
@@ -241,7 +259,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * Stops the JGameGUI and ends the program. This will subsequently call the deinit method.
      */
     public void stop() {
-        isCloseRequested = true;
+        hasProgrammicallyClosed = true;
     }
 
 

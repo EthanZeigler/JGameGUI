@@ -44,6 +44,7 @@ public class Game extends JGameGUI {
      */
     @Override
     protected void onScreenUpdate(JGameGUI gui) {
+        // gui.stop();
     }
 
     /**
@@ -51,7 +52,7 @@ public class Game extends JGameGUI {
      */
     @Override
     public void deinit() {
-        System.out.println("Stopped");
+        System.out.println("deinit");
     }
 
     public static void main(String[] args) {

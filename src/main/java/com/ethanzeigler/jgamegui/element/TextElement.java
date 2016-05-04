@@ -1,7 +1,5 @@
 package com.ethanzeigler.jgamegui.element;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
-
 import java.awt.*;
 
 /**
@@ -55,7 +53,7 @@ public class TextElement extends AbstractElement {
      * @param font the new font
      */
     public void setFont(Font font) {
-        if(font == null) throw new RuntimeException(new InvalidArgumentException(new String[] {"Cannot be null"}));
+        if(font == null) throw new RuntimeException(new IllegalArgumentException("Font cannot be null"));
         this.font = font;
         fontSize = font.getSize();
     }
@@ -103,6 +101,6 @@ public class TextElement extends AbstractElement {
         g.setFont(font);
         g.setColor(color);
 
-        g.drawString(text, (int) getxOrig(), (int) getyOrig());
+        g.drawString(text, (int) getxOrigin(), (int) getyOrigin());
     }
 }

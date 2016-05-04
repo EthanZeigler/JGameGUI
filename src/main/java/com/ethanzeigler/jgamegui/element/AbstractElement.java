@@ -33,7 +33,7 @@ public abstract class AbstractElement implements Comparable {
      *
      * @return The x origin of the ImageElement
      */
-    public double getxOrig() {
+    public double getxOrigin() {
         return xOrig;
     }
 
@@ -42,7 +42,7 @@ public abstract class AbstractElement implements Comparable {
      *
      * @param xOrig The origin to set
      */
-    public void setxOrig(double xOrig) {
+    public void setxOrigin(double xOrig) {
         this.xOrig = xOrig;
     }
 
@@ -51,7 +51,7 @@ public abstract class AbstractElement implements Comparable {
      *
      * @return The y origin of the ImageElement
      */
-    public double getyOrig() {
+    public double getyOrigin() {
         return yOrig;
     }
 
@@ -60,8 +60,24 @@ public abstract class AbstractElement implements Comparable {
      *
      * @param yOrig The y origin to set
      */
-    public void setyOrig(double yOrig) {
+    public void setyOrigin(double yOrig) {
         this.yOrig = yOrig;
+    }
+
+    /**
+     * Moves the element horizontally either left (-) or right (+) the given amount of pixels
+     * @param pixels the number of pixels to move by left or right
+     */
+    public void moveHorizontally(double pixels) {
+        this.xOrig += pixels;
+    }
+
+    /**
+     * Moves the element vertically either up (-) or down (+) the given amount of pixels
+     * @param pixels the number of pixels to move up or down
+     */
+    public void moveVertically(double pixels) {
+        this.yOrig += pixels;
     }
 
     /**

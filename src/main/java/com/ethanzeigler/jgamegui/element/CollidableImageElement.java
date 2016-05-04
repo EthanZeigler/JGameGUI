@@ -3,8 +3,7 @@ package com.ethanzeigler.jgamegui.element;
 import javax.swing.*;
 
 /**
- * An {@link ImageElement} that is extended to allow for a manual check for collisions with other CollidableImageElements using
- * {@link Collidable#isCollidingWith(Collidable)}
+ * An {@link ImageElement} that is extended to allow for a manual check for collisions with other CollidableImageElements
  */
 public class CollidableImageElement extends ImageElement implements Sized {
     private double height, width;
@@ -29,11 +28,11 @@ public class CollidableImageElement extends ImageElement implements Sized {
      * @param icon the image icon to display
      * @param xOrig the x origin
      * @param yOrig the y origin
-     * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      * @param height the collision area's height
      * @param width the collision area's width
+     * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      */
-    public CollidableImageElement(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
+    public CollidableImageElement(ImageIcon icon, double xOrig, double yOrig, double height, double width, int priority) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;
@@ -63,5 +62,16 @@ public class CollidableImageElement extends ImageElement implements Sized {
      */
     public void setWidth(double width) {
         this.width = width;
+    }
+
+    /** Gets whether the given {@link CollidableImageElement} is colliding with <i>this</i>
+     * @param collidable the collidable to inspect for collision with
+     * @return whether or not the {@link CollidableImageElement}s are colliding
+     */
+    public boolean isCollidingWith(CollidableImageElement collidable) {
+        return  !(this.getxOrigin() + this.getWidth() <= collidable.getxOrigin() ||       // a is left of b
+                this.getxOrigin() >= collidable.getxOrigin() + collidable.getWidth() || // a is right of b
+                this.getyOrigin() + this.getHeight() <= collidable.getHeight() ||       // a is above b
+                this.getyOrigin() >= collidable.getyOrigin() + collidable.getHeight());  // a is below b
     }
 }
