@@ -1,7 +1,7 @@
 package com.ethanzeigler.jgamegui.element;
 
 /**
- * Created by ethanzeigler on 4/5/16.
+ * Represents an elemet with size
  */
 public interface Sized {
     /**

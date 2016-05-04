@@ -35,10 +35,7 @@ public class AudioClip {
             e.printStackTrace();
             System.out.println("File type is unsupported. Convert your file to a \".wav\"");
             isOpen = false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            isOpen = false;
-        } catch (LineUnavailableException e) {
+        } catch (IOException | LineUnavailableException e) {
             e.printStackTrace();
             isOpen = false;
         }

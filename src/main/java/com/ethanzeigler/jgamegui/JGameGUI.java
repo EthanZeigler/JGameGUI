@@ -8,7 +8,6 @@ import com.ethanzeigler.jgamegui.element.ImageElement;
 import com.ethanzeigler.jgamegui.sound.AudioClip;
 
 import javax.swing.*;
-import javax.xml.bind.SchemaOutputResolver;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -175,8 +174,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * @return true if ImageElement was removed from the list of Elements
      */
     public boolean removeElement(AbstractElement e) {
-        boolean returnBool = elements.remove(e);
-        return returnBool;
+        return elements.remove(e);
     }
 
     /**
@@ -191,6 +189,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * if priorities are changed within an element this must be called to update the drawing order.
      */
     public void updateDrawPriorities() {
+        //noinspection unchecked
         Collections.sort(elements);
     }
 
@@ -221,7 +220,6 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         // create buffer to prevent issues with windows
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D bufferGraphic = bufferedImage.createGraphics();
-        Graphics2D g2dComponent = (Graphics2D) g;
         super.paint(bufferGraphic);
         for (AbstractElement element: elements) element.paint(bufferGraphic);
         ++tickCount;
@@ -237,7 +235,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
 
     /**
      * <p>Called before the GUI is updated each frame and can be used to update ImageElement positions.
-     * This is invoked <i><s>before</s></i> {@link JGameGUI#onScreenUpdate(JGameGUI)} and before
+     * This is invoked <i><s>before</s></i>
      * any animations defined in {@link ImageElement#setAnimation(Animation)}</p>
      *
      * @param gui The JGameGUI instance that is updating
@@ -267,7 +265,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * Invoked when the mouse button has been clicked (pressed
      * and released) on a component.
      *
-     * @param e
+     * @param e the MouseEvent
      */
     @Override
     public final void mouseClicked(MouseEvent e) {
@@ -279,7 +277,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     /**
      * Invoked when a mouse button has been pressed on a component.
      *
-     * @param e
+     * @param e the MouseEvent
      */
     @Override
     public void mousePressed(MouseEvent e) {
@@ -289,8 +287,8 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     /**
      * Loads an image file from the given path. Use this instead of ImageIcon's constructor, as it is
      * temperamental with files.
-     * @param filePath
-     * @return
+     * @param filePath the path to the image file
+     * @return the ImageIcon if found
      */
     public static ImageIcon loadImageFromFile(String filePath) {
         return new ImageIcon(JGameGUI.class.getResource("/" + filePath));
@@ -299,7 +297,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     /**
      * Invoked when a mouse button has been released on a component.
      *
-     * @param e
+     * @param e the MouseEvent
      */
     @Override
     public void mouseReleased(MouseEvent e) {
@@ -309,7 +307,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     /**
      * Invoked when the mouse enters a component.
      *
-     * @param e
+     * @param  the MouseEvent
      */
     @Override
     public void mouseEntered(MouseEvent e) {
@@ -319,7 +317,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     /**
      * Invoked when the mouse exits a component.
      *
-     * @param e
+     * @param e the MouseEvent
      */
     @Override
     public void mouseExited(MouseEvent e) {
@@ -337,7 +335,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * <code>MOUSE_DRAGGED</code> events may not be delivered during a native
      * Drag&amp;Drop operation.
      *
-     * @param e
+     * @param e the MouseEvent
      */
     @Override
     public void mouseDragged(MouseEvent e) {
@@ -348,7 +346,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * Invoked when the mouse cursor has been moved onto a component
      * but no buttons have been pushed.
      *
-     * @param e
+     * @param e the MouseEvent
      */
     @Override
     public void mouseMoved(MouseEvent e) {
@@ -361,7 +359,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * See the class description for {@link KeyEvent} for a definition of
      * a key typed event.
      *
-     * @param e
+     * @param e the KeyEvent
      */
     @Override
     public void keyTyped(KeyEvent e) {
@@ -373,7 +371,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * See the class description for {@link KeyEvent} for a definition of
      * a key pressed event.
      *
-     * @param e
+     * @param e the KeyEvent
      */
     @Override
     public void keyPressed(KeyEvent e) {
@@ -385,7 +383,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * See the class description for {@link KeyEvent} for a definition of
      * a key released event.
      *
-     * @param e
+     * @param e the KeyEvent
      */
     @Override
     public void keyReleased(KeyEvent e) {
