@@ -23,7 +23,7 @@ public class Game extends JGameGUI {
      * This can be used to set the FPS using g.setFPS and add Elements
      */
     @Override
-    public void init(JGameGUI g) {
+    public void onStart(JGameGUI g) {
         g.setFPS(50);
         e = new TextElement(0, 100, 1, "This is text");
         e.setAnimation(new Animation(new Vector(1,1), 500));
@@ -51,8 +51,8 @@ public class Game extends JGameGUI {
      * Invoked when the game stops (The window closes)
      */
     @Override
-    public void deinit() {
-        System.out.println("deinit");
+    public void onStop() {
+        System.out.println("onStop");
     }
 
     public static void main(String[] args) {

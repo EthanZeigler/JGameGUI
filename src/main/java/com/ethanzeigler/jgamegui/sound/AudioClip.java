@@ -12,6 +12,7 @@ import java.net.URL;
  */
 public class AudioClip {
     private Clip clip;
+    private boolean isPaused = false;
     /**
      * Represents if the file IO is open
      */
@@ -25,7 +26,7 @@ public class AudioClip {
     public AudioClip(String fileName) {
         URL url = AudioClip.class.getResource("/" + fileName);
         if(url == null)
-            throw new RuntimeException(new FileNotFoundException("File could not be found. If your audio file is inside" +
+            throw new RuntimeException(new FileNotFoundException("File could not be found. If your audio file is inside " +
                     "of a folder, it may not be once it is compiled. Try entering the file name directly."));
         try {
             AudioInputStream stream = AudioSystem.getAudioInputStream(url);
@@ -47,15 +48,12 @@ public class AudioClip {
      * @return true if the clip was started, false if start failed.
      */
     public boolean playOnce() {
-        if(isOpen) {
-            // clip is currently busy
-            if (clip.isActive())
-                return false;
+        if(!isOpen || clip.isActive() || clip.isRunning())
+            return false; // clip is currently busy
 
-            clip.start();
-            return true;
-        }
-        return false;
+        setPosition();
+        clip.start();
+        return true;
     }
 
     /**
@@ -64,28 +62,24 @@ public class AudioClip {
      * @return true if the clip was started, false if start failed.
      */
     public boolean playUntilStopped() {
-        if (isOpen) {
-            // clip is currently busy
-            if (clip.isActive()) return false;
+        if (!isOpen || clip.isActive() || clip.isRunning())
+            return false; // clip is currently busy
 
-            clip.loop(Clip.LOOP_CONTINUOUSLY);
-            return true;
-        }
-        return false;
+        setPosition();
+        clip.loop(Clip.LOOP_CONTINUOUSLY);
+        return true;
     }
 
     /**
      * Plays the file the amount of times specified.
      */
     public boolean playXTimes(int numOfLoops) {
-        if (isOpen) {
-            // clip is currently busy
-            if (clip.isActive()) return false;
+        if (!isOpen || clip.isActive() || clip.isRunning())
+            return false; // clip is currently busy
 
-            clip.loop(numOfLoops - 1);
-            return true;
-        }
-        return false;
+        setPosition();
+        clip.loop(numOfLoops - 1);
+        return true;
     }
 
     /**
@@ -95,15 +89,18 @@ public class AudioClip {
     public void stop() {
         clip.stop();
         clip.flush();
-        clip.setFramePosition(0);
+        isPaused = false;
     }
 
     /**
-     * Pauses the current AudioClip's playback.
+     * Pauses the current AudioClip's playback. If it is not playing, the request is ignored.
      * <i>There is not a 100% guarantee that the clip will resume from the spot it was paused.</i>
      */
     public void pause() {
-        clip.stop();
+        if((clip.isRunning() || clip.isActive()) && isOpen) {
+            clip.stop();
+            isPaused = true;
+        }
     }
 
     /**
@@ -112,5 +109,16 @@ public class AudioClip {
     public void dispose() {
         clip.close();
         isOpen = false;
+    }
+
+    /**
+     * Sets the start position of the clip before playing
+     */
+    private void setPosition() {
+        if(!isPaused) {
+            clip.setFramePosition(0);
+        }
+
+        isPaused = false;
     }
 }

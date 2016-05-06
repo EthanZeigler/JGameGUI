@@ -20,7 +20,7 @@ import java.util.List;
  * How to use this API:
  * <p>Extend JGameGUI and implement its methods. Create a new main method and create a new object of your class with your desired screen size.
  * If you received a template from Mr. Ulmer, this has already been done for you and you will change the WIDTH and HEIGHT variables.</p>
- * <p>When the game starts, init will be invoked. Here, you initialize your variables, set the frame rate using {@link JGameGUI#setFPS(int)}, which can speed up or slow down your game. About 60, which is the default, is good. load image and sound files, and add your Elements to the window stack.</p>
+ * <p>When the game starts, onStart will be invoked. Here, you initialize your variables, set the frame rate using {@link JGameGUI#setFPS(int)}, which can speed up or slow down your game. About 60, which is the default, is good. load image and sound files, and add your Elements to the window stack.</p>
  * <p>JGameGUI works by the developer adding {@link AbstractElement}s to the window. These elements represent anything that
  * can be drawn to the screen such as text, images, and buttons. All of these have pre-made objects for you to use.
  * <p><br>TextElement represents written text.
@@ -29,18 +29,18 @@ import java.util.List;
  * also be set to null and set to the size of the screen to detect clicks.
  * <br>CollidableImageElement has a predefined method for checking to see if two CollidableElements are touching.
  * </p>
- * <br><br>Together, these represent your screen. In the init method, create new elements and add them to the screen
+ * <br><br>Together, these represent your screen. In the onStart method, create new elements and add them to the screen
  * using {@link JGameGUI#addElement(AbstractElement)}. {@link Animation}s can be applied to these Elements as well using
  * the animation API, which is well documented and I will not explain here. Note that this is for late-year AP students only.
  * First years will not understand this.</p>
- * <p>What about sound? Use the sound API. Create a new AudioClip in the init method because depending on the size of the file,
+ * <p>What about sound? Use the sound API. Create a new AudioClip in the onStart method because depending on the size of the file,
  * it can cause lag spikes when loading. Using {@link AudioClip#playOnce()}, the sound file can be played. Be sure to check out the
  * other options including {@link AudioClip#playUntilStopped()}, which will play forever until told to stop.
  * </p>
  * <p>On each screen update, the onScreenUpdate method ({@link JGameGUI#onScreenUpdate(JGameGUI)} is invoked. Here you
  * can move your elements around using their set x and y methods, as well as set new animations and image files if necessary. This is the heart of your game.</p>
  * <p>When the window is closed or you want to end the game, call the {@link JGameGUI#stop()} method which will close the window and shut down the program.
- * As the program shuts down either by the stop method or the window being closed, the deinit method is called. This can be used to save files or other things you want to do.
+ * As the program shuts down either by the stop method or the window being closed, the onStop method is called. This can be used to save files or other things you want to do.
  * It is a good thing to call {@link AudioClip#dispose()}</p>
  */
 public abstract class JGameGUI extends JFrame implements MouseListener, MouseMotionListener, KeyListener {
@@ -96,16 +96,14 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
                 JGameGUI.this.dispose();
         });
         animator.setDaemon(true);
-        this.width = width;
-        this.height = height;
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBackground(Color.WHITE);
         setSize(width, height);
 
         //</editor-fold>
 
-        // calls the implementing class's init method
-        init(this);
+        // calls the implementing class's onStart method
+        onStart(this);
 
         setSize(width, height);
 
@@ -126,7 +124,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
                     e1.printStackTrace();
                 } finally {
                     // System.out.println("Animator thread lock ended. Deiniting");
-                    deinit();
+                    onStop();
                 }
             }
         });
@@ -148,12 +146,12 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     /**
      * Called before the window is displayed
      */
-    protected abstract void init(JGameGUI g);
+    protected abstract void onStart(JGameGUI g);
 
     /**
      * Called when the VM is being disabled. This method can be used to dispose of any variables or save data.
      */
-    protected void deinit() {
+    protected void onStop() {
 
     }
 
@@ -254,7 +252,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     }
 
     /**
-     * Stops the JGameGUI and ends the program. This will subsequently call the deinit method.
+     * Stops the JGameGUI and ends the program. This will subsequently call the onStop method.
      */
     public void stop() {
         hasProgrammicallyClosed = true;
@@ -307,7 +305,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     /**
      * Invoked when the mouse enters a component.
      *
-     * @param  the MouseEvent
+     * @param e the MouseEvent
      */
     @Override
     public void mouseEntered(MouseEvent e) {
