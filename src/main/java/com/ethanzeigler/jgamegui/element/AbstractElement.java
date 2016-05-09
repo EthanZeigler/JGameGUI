@@ -33,7 +33,7 @@ public abstract class AbstractElement implements Comparable {
      *
      * @return The x origin of the ImageElement
      */
-    public double getxOrigin() {
+    public double getOriginX() {
         return xOrig;
     }
 
@@ -42,7 +42,7 @@ public abstract class AbstractElement implements Comparable {
      *
      * @param xOrig The origin to set
      */
-    public void setxOrigin(double xOrig) {
+    public void setOriginX(double xOrig) {
         this.xOrig = xOrig;
     }
 
@@ -51,7 +51,7 @@ public abstract class AbstractElement implements Comparable {
      *
      * @return The y origin of the ImageElement
      */
-    public double getyOrigin() {
+    public double getOriginY() {
         return yOrig;
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractElement implements Comparable {
      *
      * @param yOrig The y origin to set
      */
-    public void setyOrigin(double yOrig) {
+    public void setOriginY(double yOrig) {
         this.yOrig = yOrig;
     }
 
@@ -100,7 +100,7 @@ public abstract class AbstractElement implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        if (o instanceof ImageElement) return priority - ((AbstractElement) o).priority;
+        if (o instanceof AbstractElement) return priority - ((AbstractElement) o).priority;
         else throw new ClassCastException(
                 "Param Object cannot be cast to com.ethanzeigler.jgamegui.ImageElement");
 

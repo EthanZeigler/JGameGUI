@@ -1,6 +1,7 @@
 package com.ethanzeigler.jgamegui.element;
 
 import com.ethanzeigler.jgamegui.JGameGUI;
+import com.sun.istack.internal.Nullable;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class ButtonImageElement extends ImageElement implements Sized {
      * @param width the clickable area's width
      * @param height the clickable area's height
      */
-    public ButtonImageElement(String resPath, double xOrig, double yOrig, int priority, double width, double height) {
+    public ButtonImageElement(@Nullable String resPath, double xOrig, double yOrig, int priority, double width, double height) {
         this(JGameGUI.loadImageFromFile(resPath), xOrig, yOrig, priority, width, height);
     }
 
@@ -38,7 +39,7 @@ public class ButtonImageElement extends ImageElement implements Sized {
      * @param width the clickable area's width
      * @param height the clickable area's height
      */
-    public ButtonImageElement(ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
+    public ButtonImageElement(@Nullable ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;

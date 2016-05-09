@@ -101,6 +101,6 @@ public class TextElement extends AbstractElement {
         g.setFont(font);
         g.setColor(color);
 
-        g.drawString(text, (int) getxOrigin(), (int) getyOrigin());
+        g.drawString(text, (int) getOriginX(), (int) getOriginY());
     }
 }

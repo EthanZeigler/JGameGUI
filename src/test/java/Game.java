@@ -1,8 +1,10 @@
 import com.ethanzeigler.jgamegui.JGameGUI;
 import com.ethanzeigler.jgamegui.animation.Animation;
 import com.ethanzeigler.jgamegui.animation.Vector;
+import com.ethanzeigler.jgamegui.element.ButtonImageElement;
 import com.ethanzeigler.jgamegui.element.ImageElement;
 import com.ethanzeigler.jgamegui.element.TextElement;
+import com.ethanzeigler.jgamegui.window.Window;
 
 import java.awt.*;
 
@@ -12,7 +14,9 @@ import java.awt.*;
 public class Game extends JGameGUI {
     public static final int WIDTH = 1000;
     public static final int HEIGHT = 1000;
+    Window window;
     TextElement e;
+    ButtonImageElement button;
 
     public Game() {
         super(WIDTH, HEIGHT);
@@ -24,12 +28,18 @@ public class Game extends JGameGUI {
      */
     @Override
     public void onStart(JGameGUI g) {
+        button = new ButtonImageElement("",0,0,0,100,100);
+        button.addButtonClickListener(() -> e.setColor(Color.BLACK));
+        window = new Window();
         g.setFPS(50);
         e = new TextElement(0, 100, 1, "This is text");
         e.setAnimation(new Animation(new Vector(1,1), 500));
         e.setFontSize(50);
         e.setColor(Color.RED);
-        g.addElement(e);
+        window.addElement(e);
+        window.addElement(button);
+        g.setWindow(window);
+        g.setWindow(window);
     }
 
     /**

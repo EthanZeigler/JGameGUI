@@ -3,17 +3,14 @@ package com.ethanzeigler.jgamegui;
 
 import com.ethanzeigler.jgamegui.animation.Animation;
 import com.ethanzeigler.jgamegui.element.AbstractElement;
-import com.ethanzeigler.jgamegui.element.ButtonImageElement;
 import com.ethanzeigler.jgamegui.element.ImageElement;
 import com.ethanzeigler.jgamegui.sound.AudioClip;
+import com.ethanzeigler.jgamegui.window.Window;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A Java Swing game API designed and created by Ethan Zeigler, class of '16.
@@ -30,7 +27,7 @@ import java.util.List;
  * <br>CollidableImageElement has a predefined method for checking to see if two CollidableElements are touching.
  * </p>
  * <br><br>Together, these represent your screen. In the onStart method, create new elements and add them to the screen
- * using {@link JGameGUI#addElement(AbstractElement)}. {@link Animation}s can be applied to these Elements as well using
+ * using . {@link Animation}s can be applied to these Elements as well using
  * the animation API, which is well documented and I will not explain here. Note that this is for late-year AP students only.
  * First years will not understand this.</p>
  * <p>What about sound? Use the sound API. Create a new AudioClip in the onStart method because depending on the size of the file,
@@ -44,7 +41,8 @@ import java.util.List;
  * It is a good thing to call {@link AudioClip#dispose()}</p>
  */
 public abstract class JGameGUI extends JFrame implements MouseListener, MouseMotionListener, KeyListener {
-    private List<AbstractElement> elements = new ArrayList<>();
+    private Window activeWindow;
+    private Window nextWindow;
     private Thread animator;
     private int width, height, frameDelay = 30;
     private boolean threadStop;
@@ -104,6 +102,8 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
 
         // calls the implementing class's onStart method
         onStart(this);
+        this.activeWindow = nextWindow;
+        nextWindow = null;
 
         setSize(width, height);
 
@@ -155,42 +155,6 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
 
     }
 
-    /**
-     * Adds the ImageElement into the GUI
-     *
-     * @param e ImageElement to add
-     */
-    public void addElement(AbstractElement e) {
-        elements.add(e);
-        updateDrawPriorities();
-    }
-
-    /**
-     * Removes the ImageElement from the GUI.
-     *
-     * @param e ImageElement to remove
-     * @return true if ImageElement was removed from the list of Elements
-     */
-    public boolean removeElement(AbstractElement e) {
-        return elements.remove(e);
-    }
-
-    /**
-     * Removes all Elements from the GUI
-     */
-    public void removeAllElements() {
-        elements.clear();
-    }
-
-    /**
-     * Updates the order Elements are called in. This is called when either add or remove element are called, but
-     * if priorities are changed within an element this must be called to update the drawing order.
-     */
-    public void updateDrawPriorities() {
-        //noinspection unchecked
-        Collections.sort(elements);
-    }
-
 
     /**
      * Invoked by Swing to draw components.
@@ -219,16 +183,24 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D bufferGraphic = bufferedImage.createGraphics();
         super.paint(bufferGraphic);
-        for (AbstractElement element: elements) element.paint(bufferGraphic);
-        ++tickCount;
+        if (validateWindow())
+            activeWindow.paint(bufferGraphic);
         g.drawImage(bufferedImage, 0, 0, null);
+        ++tickCount;
+
+        // see if new window has been assigned
+        if(nextWindow != null) {
+            activeWindow = nextWindow;
+            nextWindow = null;
+        }
     }
 
     /**
      * Backend method for delegating actions to be taken on a tick update.
      */
-    private void onTick() {
-        elements.stream().forEach(element -> element.runTick(tickCount));
+    public void onTick() {
+        if (validateWindow())
+        activeWindow.runTick(tickCount);
     }
 
     /**
@@ -258,6 +230,22 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         hasProgrammicallyClosed = true;
     }
 
+    /**
+     * Gets the currently displayed window
+     * @return the currently displayed window
+     */
+    public Window getWindow() {
+        return activeWindow;
+    }
+
+    /**
+     * Sets the next window to be displayed. Is thread safe and will replace the current window at the next screen refresh.
+     * @param nextWindow the next window to display
+     */
+    public void setWindow(Window nextWindow) {
+        this.nextWindow = nextWindow;
+    }
+
 
     /**
      * Invoked when the mouse button has been clicked (pressed
@@ -267,9 +255,8 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      */
     @Override
     public final void mouseClicked(MouseEvent e) {
-        elements.stream().filter(element -> element instanceof ButtonImageElement)
-                .filter(element1 -> ((ButtonImageElement) element1).isClicked(e.getX(), e.getY()))
-                .sequential().limit(1).forEach(element2 -> ((ButtonImageElement)element2).onClick());
+        if (validateWindow())
+            activeWindow.runMouseClick(e);
     }
 
     /**
@@ -292,6 +279,13 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         return new ImageIcon(JGameGUI.class.getResource("/" + filePath));
     }
 
+    /**
+     * Checks if the current window is valid
+     * @return is the current window is valid
+     */
+    private boolean validateWindow() {
+        return activeWindow != null;
+    }
     /**
      * Invoked when a mouse button has been released on a component.
      *

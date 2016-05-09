@@ -69,9 +69,9 @@ public class CollidableImageElement extends ImageElement implements Sized {
      * @return whether or not the {@link CollidableImageElement}s are colliding
      */
     public boolean isCollidingWith(CollidableImageElement collidable) {
-        return  !(this.getxOrigin() + this.getWidth() <= collidable.getxOrigin() ||       // a is left of b
-                this.getxOrigin() >= collidable.getxOrigin() + collidable.getWidth() || // a is right of b
-                this.getyOrigin() + this.getHeight() <= collidable.getHeight() ||       // a is above b
-                this.getyOrigin() >= collidable.getyOrigin() + collidable.getHeight());  // a is below b
+        return  !(this.getOriginX() + this.getWidth() <= collidable.getOriginX() ||       // a is left of b
+                this.getOriginX() >= collidable.getOriginX() + collidable.getWidth() || // a is right of b
+                this.getOriginY() + this.getHeight() <= collidable.getHeight() ||       // a is above b
+                this.getOriginY() >= collidable.getOriginY() + collidable.getHeight());  // a is below b
     }
 }

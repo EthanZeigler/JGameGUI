@@ -29,9 +29,10 @@ public class AudioClip {
             throw new RuntimeException(new FileNotFoundException("File could not be found. If your audio file is inside " +
                     "of a folder, it may not be once it is compiled. Try entering the file name directly."));
         try {
-            AudioInputStream stream = AudioSystem.getAudioInputStream(url);
-            clip = AudioSystem.getClip();
-            clip.open(stream);
+            AudioInputStream inputStream = AudioSystem.getAudioInputStream(url);
+            DataLine.Info info = new DataLine.Info(Clip.class, inputStream.getFormat());
+            clip = (Clip)AudioSystem.getLine(info);
+            clip.open(inputStream);
         } catch (UnsupportedAudioFileException e) {
             e.printStackTrace();
             System.out.println("File type is unsupported. Convert your file to a \".wav\"");
@@ -48,6 +49,7 @@ public class AudioClip {
      * @return true if the clip was started, false if start failed.
      */
     public boolean playOnce() {
+        System.out.println("Is busy: " + (!isOpen || clip.isActive() || clip.isRunning()));
         if(!isOpen || clip.isActive() || clip.isRunning())
             return false; // clip is currently busy
 
@@ -118,7 +120,6 @@ public class AudioClip {
         if(!isPaused) {
             clip.setFramePosition(0);
         }
-
         isPaused = false;
     }
 }

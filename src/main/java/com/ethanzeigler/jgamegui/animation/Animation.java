@@ -64,8 +64,8 @@ public class Animation {
             runnable.onUpdate(currentTicks, element, this);
             return this.doCancel;
         } else {
-            element.setxOrigin(element.getxOrigin() + vector.getHorizontalMagnitude());
-            element.setyOrigin(element.getyOrigin() + vector.getVerticalMagnitude());
+            element.setOriginX(element.getOriginX() + vector.getHorizontalMagnitude());
+            element.setOriginY(element.getOriginY() + vector.getVerticalMagnitude());
             return totalTicks != -1 && totalTicks <= currentTicks;
         }
     }
