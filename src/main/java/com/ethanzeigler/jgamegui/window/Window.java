@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class Window {
     private List<AbstractElement> elements = new ArrayList<>();
+    private long tickCount = 1;
 
     /**
      * Removes the ImageElement from the window
@@ -58,12 +59,14 @@ public class Window {
      */
     public void paint(Graphics g) {
         for (AbstractElement element: elements) element.paint(g);
+        tickCount++;
     }
 
     /**
      * Backend method for delegating actions to be taken on a tick update.
      */
-    public void runTick(long tickCount) {
+
+    public void runTick() {
         elements.stream().forEach(element -> element.runTick(tickCount));
     }
 

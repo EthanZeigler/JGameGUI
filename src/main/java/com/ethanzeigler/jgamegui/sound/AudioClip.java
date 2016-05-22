@@ -49,7 +49,7 @@ public class AudioClip {
      * @return true if the clip was started, false if start failed.
      */
     public boolean playOnce() {
-        System.out.println("Is busy: " + (!isOpen || clip.isActive() || clip.isRunning()));
+        //System.out.println("Is busy: " + (!isOpen || clip.isActive() || clip.isRunning()));
         if(!isOpen || clip.isActive() || clip.isRunning())
             return false; // clip is currently busy
 

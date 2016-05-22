@@ -71,7 +71,7 @@ public class CollidableImageElement extends ImageElement implements Sized {
     public boolean isCollidingWith(CollidableImageElement collidable) {
         return  !(this.getOriginX() + this.getWidth() <= collidable.getOriginX() ||       // a is left of b
                 this.getOriginX() >= collidable.getOriginX() + collidable.getWidth() || // a is right of b
-                this.getOriginY() + this.getHeight() <= collidable.getHeight() ||       // a is above b
+                this.getOriginY() + this.getHeight() <= collidable.getOriginY() ||       // a is above b
                 this.getOriginY() >= collidable.getOriginY() + collidable.getHeight());  // a is below b
     }
 }

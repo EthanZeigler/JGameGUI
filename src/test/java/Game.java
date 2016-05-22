@@ -15,7 +15,6 @@ public class Game extends JGameGUI {
     public static final int WIDTH = 1000;
     public static final int HEIGHT = 1000;
     Window window;
-    TextElement e;
     ButtonImageElement button;
 
     public Game() {
@@ -28,41 +27,11 @@ public class Game extends JGameGUI {
      */
     @Override
     public void onStart(JGameGUI g) {
-        button = new ButtonImageElement("",0,0,0,100,100);
-        button.addButtonClickListener(() -> e.setColor(Color.BLACK));
-        window = new Window();
-        g.setFPS(50);
-        e = new TextElement(0, 100, 1, "This is text");
-        e.setAnimation(new Animation(new Vector(1,1), 500));
-        e.setFontSize(50);
-        e.setColor(Color.RED);
-        window.addElement(e);
+        window=new Window();
+        button=new ButtonImageElement("square.png",0,0,0,600,600);
+        button.addButtonClickListener(() -> System.out.println("Button"));
         window.addElement(button);
         g.setWindow(window);
-        g.setWindow(window);
-    }
-
-    /**
-     * <p>Called before the GUI is updated each frame and can be used to update ImageElement positions.
-     * This is invoked <b><i>before</i></b> before
-     * any animations defined in {@link ImageElement#setAnimation(Animation)}</p>
-     * <p>The more preferable alternative to overriding this is using the animating API
-     * included with {@link ImageElement#setAnimation}, however, this creates a more simplistic approach
-     * for learners and backwards compatibility with previous teaching games.</p>
-     *
-     * @param gui The JGameGUI instance that is updating
-     */
-    @Override
-    protected void onScreenUpdate(JGameGUI gui) {
-        // gui.stop();
-    }
-
-    /**
-     * Invoked when the game stops (The window closes)
-     */
-    @Override
-    public void onStop() {
-        System.out.println("onStop");
     }
 
     public static void main(String[] args) {

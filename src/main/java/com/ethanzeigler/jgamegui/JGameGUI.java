@@ -17,8 +17,8 @@ import java.awt.image.BufferedImage;
  * How to use this API:
  * <p>Extend JGameGUI and implement its methods. Create a new main method and create a new object of your class with your desired screen size.
  * If you received a template from Mr. Ulmer, this has already been done for you and you will change the WIDTH and HEIGHT variables.</p>
- * <p>When the game starts, onStart will be invoked. Here, you initialize your variables, set the frame rate using {@link JGameGUI#setFPS(int)}, which can speed up or slow down your game. About 60, which is the default, is good. load image and sound files, and add your Elements to the window stack.</p>
- * <p>JGameGUI works by the developer adding {@link AbstractElement}s to the window. These elements represent anything that
+ * <p>When the game starts, onStart will be invoked. Here, you initialize your variables, set the frame rate using {@link JGameGUI#setFPS(int)}, which can speed up or slow down your game. About 60, which is the default, is good. load image and sound files, and add your Elements to your {@link Window}.</p>
+ * <p>JGameGUI works by the developer adding {@link AbstractElement}s to {@link Window}s. These elements represent anything that
  * can be drawn to the screen such as text, images, and buttons. All of these have pre-made objects for you to use.
  * <p><br>TextElement represents written text.
  * <br>ImageElement represents a plain ol' image.
@@ -26,8 +26,8 @@ import java.awt.image.BufferedImage;
  * also be set to null and set to the size of the screen to detect clicks.
  * <br>CollidableImageElement has a predefined method for checking to see if two CollidableElements are touching.
  * </p>
- * <br><br>Together, these represent your screen. In the onStart method, create new elements and add them to the screen
- * using . {@link Animation}s can be applied to these Elements as well using
+ * <br><br>{@link Window}s represent a list of Elements to be displayed. In the onStart method, create new elements and add them to the screen
+ * using {@link JGameGUI#setWindow(Window)}. {@link Animation}s can be applied to these Elements as well using
  * the animation API, which is well documented and I will not explain here. Note that this is for late-year AP students only.
  * First years will not understand this.</p>
  * <p>What about sound? Use the sound API. Create a new AudioClip in the onStart method because depending on the size of the file,
@@ -35,7 +35,7 @@ import java.awt.image.BufferedImage;
  * other options including {@link AudioClip#playUntilStopped()}, which will play forever until told to stop.
  * </p>
  * <p>On each screen update, the onScreenUpdate method ({@link JGameGUI#onScreenUpdate(JGameGUI)} is invoked. Here you
- * can move your elements around using their set x and y methods, as well as set new animations and image files if necessary. This is the heart of your game.</p>
+ * can move your elements around using their set x and y methods, change the shown window, as well as set new animations and image files if necessary. This is the heart of your game.</p>
  * <p>When the window is closed or you want to end the game, call the {@link JGameGUI#stop()} method which will close the window and shut down the program.
  * As the program shuts down either by the stop method or the window being closed, the onStop method is called. This can be used to save files or other things you want to do.
  * It is a good thing to call {@link AudioClip#dispose()}</p>
@@ -46,7 +46,6 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     private Thread animator;
     private int width, height, frameDelay = 30;
     private boolean threadStop;
-    private long tickCount = 1;
     private boolean hasProgrammicallyClosed = false;
     private boolean hasUserClosed = false;
 
@@ -186,7 +185,6 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         if (validateWindow())
             activeWindow.paint(bufferGraphic);
         g.drawImage(bufferedImage, 0, 0, null);
-        ++tickCount;
 
         // see if new window has been assigned
         if(nextWindow != null) {
@@ -200,7 +198,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      */
     public void onTick() {
         if (validateWindow())
-        activeWindow.runTick(tickCount);
+        activeWindow.runTick();
     }
 
     /**
@@ -254,19 +252,20 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * @param e the MouseEvent
      */
     @Override
-    public final void mouseClicked(MouseEvent e) {
-        if (validateWindow())
-            activeWindow.runMouseClick(e);
+    public void mouseClicked(MouseEvent e) {
+
     }
 
     /**
-     * Invoked when a mouse button has been pressed on a component.
+     * Invoked when a mouse button has been pressed on a component. JGameGUI's click method must be called to avoid
+     * errors if overridden
      *
      * @param e the MouseEvent
      */
     @Override
     public void mousePressed(MouseEvent e) {
-
+        if (validateWindow())
+            activeWindow.runMouseClick(e);
     }
 
     /**
@@ -367,7 +366,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        System.out.println("Press: " + e.getKeyChar());
+
     }
 
     /**
@@ -379,6 +378,6 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        System.out.println("Release: " + e.getKeyChar());
+
     }
 }
