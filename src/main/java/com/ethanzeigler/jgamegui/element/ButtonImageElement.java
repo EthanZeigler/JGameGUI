@@ -86,7 +86,7 @@ public class ButtonImageElement extends ImageElement implements Sized {
      */
     @Override
     public double getWidth() {
-        return 0;
+        return width;
     }
 
     /**
@@ -96,6 +96,6 @@ public class ButtonImageElement extends ImageElement implements Sized {
      */
     @Override
     public double getHeight() {
-        return 0;
+        return height;
     }
 }
