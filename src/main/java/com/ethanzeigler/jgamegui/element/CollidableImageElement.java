@@ -1,4 +1,11 @@
+/*
+ * Copyright (c) 2016 under the Attribution-ShareAlike 4.0 International licence.
+ * See JGameGUI-licence.txt for more information
+ */
+
 package com.ethanzeigler.jgamegui.element;
+
+import com.sun.istack.internal.Nullable;
 
 import javax.swing.*;
 
@@ -6,18 +13,18 @@ import javax.swing.*;
  * An {@link ImageElement} that is extended to allow for a manual check for collisions with other CollidableImageElements
  */
 public class CollidableImageElement extends ImageElement implements Sized {
-    private double height, width;
+    protected double height, width;
 
     /**
      * An ImageElement with the ability to check for collisions with other CollidableImageElements.
      * @param resPath the path to the image resource to display
      * @param xOrig the x origin
      * @param yOrig the y origin
-     * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
-     * @param height the collision area's height
      * @param width the collision area's width
+     * @param height the collision area's height
+     * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      */
-    public CollidableImageElement(String resPath, double xOrig, double yOrig, int priority, double height, double width) {
+    public CollidableImageElement(String resPath, double xOrig, double yOrig, double width, double height, int priority) {
         super(resPath, xOrig, yOrig, priority);
         this.height = height;
         this.width = width;
@@ -28,11 +35,11 @@ public class CollidableImageElement extends ImageElement implements Sized {
      * @param icon the image icon to display
      * @param xOrig the x origin
      * @param yOrig the y origin
-     * @param height the collision area's height
      * @param width the collision area's width
+     * @param height the collision area's height
      * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      */
-    public CollidableImageElement(ImageIcon icon, double xOrig, double yOrig, double height, double width, int priority) {
+    public CollidableImageElement(@Nullable ImageIcon icon, double xOrig, double yOrig, double width, double height, int priority) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2016 under the Attribution-ShareAlike 4.0 International licence.
+ * See JGameGUI-licence.txt for more information
+ */
+
 package com.ethanzeigler.jgamegui.element;
 
 import java.awt.*;
@@ -14,12 +19,12 @@ public class TextElement extends AbstractElement {
     /**
      * Represents written text on the screen. <b><u>This Element's origin is on the <i>bottom</i> right,
      * not the top right like other Elements. This is due to the behavior of the Swing API.</u></b>
+     * @param text the text to be drawn
      * @param xOrig x origin, the leftmost point
      * @param yOrig y origin, the bottommost point
      * @param priority the draw priority
-     * @param text the text to be drawn
      */
-    public TextElement(double xOrig, double yOrig, int priority, String text) {
+    public TextElement(String text, double xOrig, double yOrig, int priority) {
         super(xOrig, yOrig, priority);
         this.text = text;
     }

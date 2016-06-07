@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2016 under the Attribution-ShareAlike 4.0 International licence.
+ * See JGameGUI-licence.txt for more information
+ */
+
 package com.ethanzeigler.jgamegui;
 
 
@@ -5,7 +10,6 @@ import com.ethanzeigler.jgamegui.animation.Animation;
 import com.ethanzeigler.jgamegui.element.AbstractElement;
 import com.ethanzeigler.jgamegui.element.ImageElement;
 import com.ethanzeigler.jgamegui.sound.AudioClip;
-import com.ethanzeigler.jgamegui.window.Window;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,8 +35,8 @@ import java.awt.image.BufferedImage;
  * the animation API, which is well documented and I will not explain here. Note that this is for late-year AP students only.
  * First years will not understand this.</p>
  * <p>What about sound? Use the sound API. Create a new AudioClip in the onStart method because depending on the size of the file,
- * it can cause lag spikes when loading. Using {@link AudioClip#playOnce()}, the sound file can be played. Be sure to check out the
- * other options including {@link AudioClip#playUntilStopped()}, which will play forever until told to stop.
+ * it can cause lag spikes when loading. Using {@link AudioClip#play()}, the sound file can be played. Be sure to check out the
+ * other options including {@link AudioClip#loop()}, which will play forever until told to stop.
  * </p>
  * <p>On each screen update, the onScreenUpdate method ({@link JGameGUI#onScreenUpdate(JGameGUI)} is invoked. Here you
  * can move your elements around using their set x and y methods, change the shown window, as well as set new animations and image files if necessary. This is the heart of your game.</p>
@@ -44,21 +48,36 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     private Window activeWindow;
     private Window nextWindow;
     private Thread animator;
-    private int width, height, frameDelay = 30;
+    private int defaultWidth, defaultHeight, frameDelay = 30;
+    // these are different. When the window is overriding the defaults, the vals are stored here
+    private int currentWidth, currentHeight;
     private boolean threadStop;
     private boolean hasProgrammicallyClosed = false;
     private boolean hasUserClosed = false;
 
+    private ActionListener windowSizeChangeListener;
+    private boolean reevalWindowSize = false;
+
     /**
      * Creates a new JGameGUI and immediately begins to start the frame.
      **/
-    public JGameGUI(int width, int height) {
+    public JGameGUI(int defaultWidth, int defaultHeight) {
 
         //<editor-fold desc="Window setup">
         super();
-        this.width = width;
-        this.height = height;
+        this.defaultWidth = defaultWidth;
+        this.defaultHeight = defaultHeight;
         setResizable(false);
+
+        // sent to active windows to a change check isn't done every tick, which causes a lot of unnecessary operations
+        windowSizeChangeListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                // this will create a thread-safe method of delaying that lookup until ready at end of paint
+                reevalWindowSize = true;
+            }
+        };
+
         animator = new Thread(() -> {
             while (!threadStop) {
                 try {
@@ -95,7 +114,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         animator.setDaemon(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBackground(Color.WHITE);
-        setSize(width, height);
+        setSize(defaultWidth, defaultHeight);
 
         //</editor-fold>
 
@@ -103,8 +122,8 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         onStart(this);
         this.activeWindow = nextWindow;
         nextWindow = null;
-
-        setSize(width, height);
+        activeWindow.setSizeChangeListener(windowSizeChangeListener);
+        refreshWindowSize();
 
         // add listener for window closing
         addWindowListener(new WindowAdapter() {
@@ -178,18 +197,30 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      */
     @Override
     public void paint(Graphics g) {
+
         // create buffer to prevent issues with windows
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bufferedImage = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D bufferGraphic = bufferedImage.createGraphics();
         super.paint(bufferGraphic);
         if (validateWindow())
             activeWindow.paint(bufferGraphic);
         g.drawImage(bufferedImage, 0, 0, null);
 
-        // see if new window has been assigned
+        // check if the window size had a change
+        if (reevalWindowSize) {
+            refreshWindowSize();
+            reevalWindowSize = false;
+        }
+
+        // see if new window has been assigned and other necessary operations involved with that
         if(nextWindow != null) {
+            if (validateWindow())
+                activeWindow.removeSizeChangeListener();
+
             activeWindow = nextWindow;
             nextWindow = null;
+            activeWindow.setSizeChangeListener(windowSizeChangeListener);
+            refreshWindowSize();
         }
     }
 
@@ -244,6 +275,16 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         this.nextWindow = nextWindow;
     }
 
+    /**
+     * Sets the application's default size. This is used when the displayed {@link Window} is null or when the Window has
+     * no set size of it's own.
+     * @param width
+     * @param height
+     */
+    public void setDefaultSize(int width, int height) {
+        this.defaultWidth = width;
+        this.defaultHeight = height;
+    }
 
     /**
      * Invoked when the mouse button has been clicked (pressed
@@ -275,6 +316,9 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * @return the ImageIcon if found
      */
     public static ImageIcon loadImageFromFile(String filePath) {
+        if (filePath == null)
+            return null;
+
         return new ImageIcon(JGameGUI.class.getResource("/" + filePath));
     }
 
@@ -285,6 +329,27 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     private boolean validateWindow() {
         return activeWindow != null;
     }
+
+    /**
+     * Refreshes the application's window size.
+     */
+    private void refreshWindowSize() {
+        if (validateWindow()) {
+            if (activeWindow.getHeight() != 0 && activeWindow.getWidth() != 0) {
+                currentWidth = activeWindow.getWidth();
+                currentHeight = activeWindow.getHeight();
+            } else {
+                currentWidth = defaultWidth;
+                currentHeight = defaultHeight;
+            }
+        } else {
+            currentWidth = defaultWidth;
+            currentHeight = defaultHeight;
+        }
+
+        setSize(currentWidth, currentHeight);
+    }
+
     /**
      * Invoked when a mouse button has been released on a component.
      *

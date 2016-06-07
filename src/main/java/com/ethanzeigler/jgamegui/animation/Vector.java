@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2016 under the Attribution-ShareAlike 4.0 International licence.
+ * See JGameGUI-licence.txt for more information
+ */
+
 package com.ethanzeigler.jgamegui.animation;
 
 /**
