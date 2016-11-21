@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2016 under the Attribution-ShareAlike 4.0 International licence.
+ * See JGameGUI-licence.txt for more information
+ */
+
 package com.ethanzeigler.jgamegui.sound;
 
 import javax.sound.sampled.*;
@@ -48,7 +53,7 @@ public class AudioClip {
      * <p>Failures can be caused by the clip currently being busy {@link Clip#isActive()}</p>
      * @return true if the clip was started, false if start failed.
      */
-    public boolean playOnce() {
+    public boolean play() {
         //System.out.println("Is busy: " + (!isOpen || clip.isActive() || clip.isRunning()));
         if(!isOpen || clip.isActive() || clip.isRunning())
             return false; // clip is currently busy
@@ -63,7 +68,7 @@ public class AudioClip {
      * <p>Failures can be caused by the clip currently being busy {@link Clip#isActive()}</p>
      * @return true if the clip was started, false if start failed.
      */
-    public boolean playUntilStopped() {
+    public boolean loop() {
         if (!isOpen || clip.isActive() || clip.isRunning())
             return false; // clip is currently busy
 
@@ -75,7 +80,7 @@ public class AudioClip {
     /**
      * Plays the file the amount of times specified.
      */
-    public boolean playXTimes(int numOfLoops) {
+    public boolean loop(int numOfLoops) {
         if (!isOpen || clip.isActive() || clip.isRunning())
             return false; // clip is currently busy
 

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2016 under the Attribution-ShareAlike 4.0 International licence.
+ * See JGameGUI-licence.txt for more information
+ */
+
 package com.ethanzeigler.jgamegui.element;
 
 import com.sun.istack.internal.Nullable;
@@ -30,11 +35,11 @@ public class CollidableImageElement extends ImageElement implements Sized {
      * @param icon the image icon to display
      * @param xOrig the x origin
      * @param yOrig the y origin
-     * @param height the collision area's height
      * @param width the collision area's width
+     * @param height the collision area's height
      * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      */
-    public CollidableImageElement(@Nullable ImageIcon icon, double xOrig, double yOrig, double height, double width, int priority) {
+    public CollidableImageElement(ImageIcon icon, double xOrig, double yOrig, double height, double width, int priority) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;

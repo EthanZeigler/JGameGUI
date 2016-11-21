@@ -1,6 +1,7 @@
 import com.ethanzeigler.jgamegui.JGameGUI;
 import com.ethanzeigler.jgamegui.element.ButtonImageElement;
 import com.ethanzeigler.jgamegui.Window;
+import com.ethanzeigler.jgamegui.Window;
 import com.ethanzeigler.jgamegui.element.TextElement;
 
 import java.awt.event.KeyEvent;

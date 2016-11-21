@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2016 under the Attribution-ShareAlike 4.0 International licence.
+ * See JGameGUI-licence.txt for more information
+ */
+
 package com.ethanzeigler.jgamegui;
 
 
@@ -30,8 +35,8 @@ import java.awt.image.BufferedImage;
  * the animation API, which is well documented and I will not explain here. Note that this is for late-year AP students only.
  * First years will not understand this.</p>
  * <p>What about sound? Use the sound API. Create a new AudioClip in the onStart method because depending on the size of the file,
- * it can cause lag spikes when loading. Using {@link AudioClip#playOnce()}, the sound file can be played. Be sure to check out the
- * other options including {@link AudioClip#playUntilStopped()}, which will play forever until told to stop.
+ * it can cause lag spikes when loading. Using {@link AudioClip#play()}, the sound file can be played. Be sure to check out the
+ * other options including {@link AudioClip#loop()}, which will play forever until told to stop.
  * </p>
  * <p>On each screen update, the onScreenUpdate method ({@link JGameGUI#onScreenUpdate(JGameGUI)} is invoked. Here you
  * can move your elements around using their set x and y methods, change the shown window, as well as set new animations and image files if necessary. This is the heart of your game.</p>
@@ -116,7 +121,19 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
 
         this.defaultWidth = defaultWidth;
         this.defaultHeight = defaultHeight;
+        this.defaultWidth = defaultWidth;
+        this.defaultHeight = defaultHeight;
         setResizable(false);
+
+        // sent to active windows to a change check isn't done every tick, which causes a lot of unnecessary operations
+        windowSizeChangeListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                // this will create a thread-safe method of delaying that lookup until ready at end of paint
+                reevalWindowSize = true;
+            }
+        };
+
 
         // sent to active windows to a change check isn't done every tick, which causes a lot of unnecessary operations
         windowSizeChangeListener = new ActionListener() {
@@ -226,7 +243,55 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     }
 
 
+    /**
+     * Invoked by Swing to draw components.
+     * Applications should not invoke <code>paint</code> directly,
+     * but should instead use the <code>repaint</code> method to
+     * schedule the component for redrawing.
+     * <p>
+     * This method actually delegates the work of painting to three
+     * protected methods: <code>paintComponent</code>,
+     * <code>paintBorder</code>,
+     * and <code>paintChildren</code>.  They're called in the order
+     * listed to ensure that children appear on top of component itself.
+     * Generally speaking, the component and its children should not
+     * paint in the insets area allocated to the border. Subclasses can
+     * just override this method, as always.  A subclass that just
+     * wants to specialize the UI (look and feel) delegate's
+     * <code>paint</code> method should just override
+     * <code>paintComponent</code>.
+     *
+     * @param g the <code>Graphics</code> context in which to paint
+     * @see #repaint
+     */
+    @Override
+    public void paint(Graphics g) {
 
+        // create buffer to prevent issues with windows
+        BufferedImage bufferedImage = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D bufferGraphic = bufferedImage.createGraphics();
+        super.paint(bufferGraphic);
+        if (validateWindow())
+            activeWindow.paint(bufferGraphic);
+        g.drawImage(bufferedImage, 0, 0, null);
+
+        // check if the window size had a change
+        if (reevalWindowSize) {
+            refreshWindowSize();
+            reevalWindowSize = false;
+        }
+
+        // see if new window has been assigned and other necessary operations involved with that
+        if(nextWindow != null) {
+            if (validateWindow())
+                activeWindow.removeSizeChangeListener();
+
+            activeWindow = nextWindow;
+            nextWindow = null;
+            activeWindow.setSizeChangeListener(windowSizeChangeListener);
+            refreshWindowSize();
+        }
+    }
 
     /**
      * Backend method for delegating actions to be taken on a tick update.
@@ -320,6 +385,9 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * @return the ImageIcon if found
      */
     public static ImageIcon loadImageFromFile(String filePath) {
+        if (filePath == null)
+            return null;
+
         return new ImageIcon(JGameGUI.class.getResource("/" + filePath));
     }
 
