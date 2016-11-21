@@ -25,7 +25,7 @@ import java.awt.image.BufferedImage;
  * <p>JGameGUI works by the developer adding {@link AbstractElement}s to {@link Window}s. These elements represent anything that
  * can be drawn to the screen such as text, images, and buttons. All of these have pre-made objects for you to use.
  * <p><br>TextElement represents written text.
- * <br>ImageElement represents a plain ol' image.
+ * <br>ImageElement represents a bitmap image.
  * <br>ButtonImageElement represents an image as a button. This also requires the image's size as an argument. The image can
  * also be set to null and set to the size of the screen to detect clicks.
  * <br>CollidableImageElement has a predefined method for checking to see if two CollidableElements are touching.
