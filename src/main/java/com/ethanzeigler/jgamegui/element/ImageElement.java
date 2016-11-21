@@ -1,13 +1,14 @@
 package com.ethanzeigler.jgamegui.element;
 
 import com.ethanzeigler.jgamegui.JGameGUI;
+import com.ethanzeigler.jgamegui.Window;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
  * An Element that draws its image on screen from the top-right corner as the origin. Added to the window stack using
- * {@link JGameGUI#addElement(AbstractElement)}, it will be drawn to the screen on each update based on the ImageElement's
+ * {@link Window#addElement(AbstractElement)}, it will be drawn to the screen on each update based on the ImageElement's
  * current x and y origin position. The size of the image drawn is dependent on the size of the image provided.
  */
 public class ImageElement extends AbstractElement {
@@ -70,7 +71,9 @@ public class ImageElement extends AbstractElement {
      */
     public void setImg(String filePath) {
         System.out.println(this.getClass().getResource(filePath));
-        this.img = new ImageIcon(this.getClass().getResource(filePath)).getImage();
+        try {
+            this.img = new ImageIcon(this.getClass().getResource(filePath)).getImage();
+        } catch (NullPointerException e) {}
     }
 
 

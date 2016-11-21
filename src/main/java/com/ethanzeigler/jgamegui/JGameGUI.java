@@ -5,7 +5,6 @@ import com.ethanzeigler.jgamegui.animation.Animation;
 import com.ethanzeigler.jgamegui.element.AbstractElement;
 import com.ethanzeigler.jgamegui.element.ImageElement;
 import com.ethanzeigler.jgamegui.sound.AudioClip;
-import com.ethanzeigler.jgamegui.window.Window;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,25 +40,97 @@ import java.awt.image.BufferedImage;
  * It is a good thing to call {@link AudioClip#dispose()}</p>
  */
 public abstract class JGameGUI extends JFrame implements MouseListener, MouseMotionListener, KeyListener {
+    private JPanel rootPanel;
     private Window activeWindow;
     private Window nextWindow;
     private Thread animator;
-    private int width, height, frameDelay = 30;
+    private int defaultWidth, defaultHeight, frameDelay = 30;
+    // these are different. When the window is overriding the defaults, the vals are stored here
+    private int currentWidth, currentHeight;
     private boolean threadStop;
     private boolean hasProgrammicallyClosed = false;
     private boolean hasUserClosed = false;
 
+    private ActionListener windowSizeChangeListener;
+    private boolean reevalWindowSize = false;
+
     /**
      * Creates a new JGameGUI and immediately begins to start the frame.
      **/
-    public JGameGUI(int width, int height) {
+    public JGameGUI(int defaultWidth, int defaultHeight) {
 
         //<editor-fold desc="Window setup">
         super();
-        this.width = width;
-        this.height = height;
+        rootPanel = new JPanel(true) {
+            /**
+             * Invoked by Swing to draw components.
+             * Applications should not invoke <code>paint</code> directly,
+             * but should instead use the <code>repaint</code> method to
+             * schedule the component for redrawing.
+             * <p>
+             * This method actually delegates the work of painting to three
+             * protected methods: <code>paintComponent</code>,
+             * <code>paintBorder</code>,
+             * and <code>paintChildren</code>.  They're called in the order
+             * listed to ensure that children appear on top of component itself.
+             * Generally speaking, the component and its children should not
+             * paint in the insets area allocated to the border. Subclasses can
+             * just override this method, as always.  A subclass that just
+             * wants to specialize the UI (look and feel) delegate's
+             * <code>paint</code> method should just override
+             * <code>paintComponent</code>.
+             *
+             * @param g the <code>Graphics</code> context in which to paint
+             * @see #repaint
+             */
+            @Override
+            public void paint(Graphics g) {
+
+                // create buffer to prevent issues with windows
+                BufferedImage bufferedImage = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D bufferGraphic = bufferedImage.createGraphics();
+                super.paint(bufferGraphic);
+                if (validateWindow()) {
+                    activeWindow.paint(bufferGraphic);
+                }
+                g.drawImage(bufferedImage, 0, 0, null);
+
+                // check if the window size had a change
+                if (reevalWindowSize) {
+                    refreshWindowSize();
+                    reevalWindowSize = false;
+                }
+
+                // see if new window has been assigned and other necessary operations involved with that
+                if(nextWindow != null) {
+                    if (validateWindow()) {
+                        activeWindow.removeSizeChangeListener();
+                    }
+                    activeWindow = nextWindow;
+                    nextWindow = null;
+                    activeWindow.setSizeChangeListener(windowSizeChangeListener);
+                    refreshWindowSize();
+                }
+            }
+        };
+
+        this.defaultWidth = defaultWidth;
+        this.defaultHeight = defaultHeight;
         setResizable(false);
+
+        // sent to active windows to a change check isn't done every tick, which causes a lot of unnecessary operations
+        windowSizeChangeListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                // this will create a thread-safe method of delaying that lookup until ready at end of paint
+                reevalWindowSize = true;
+            }
+        };
+
+        this.setContentPane(rootPanel);
+
         animator = new Thread(() -> {
+            requestFocus(true);
             while (!threadStop) {
                 try {
                     // System.out.println("Thread stop status: " +threadStop);
@@ -67,7 +138,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
                     long preMills = System.currentTimeMillis(); // time before update math
                     onScreenUpdate(this); // invoke user edits on a tick
                     onTick(); // invoke animations and other updates handled by API
-                    repaint(); // tell JFrame to update screen and call paint w/ thread safety
+                    rootPanel.repaint(); // tell JFrame to update screen and call paint w/ thread safety
 
                     if (hasProgrammicallyClosed) {
                         // System.out.println("Close programmatically requested");
@@ -95,7 +166,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         animator.setDaemon(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBackground(Color.WHITE);
-        setSize(width, height);
+        setSize(defaultWidth, defaultHeight);
 
         //</editor-fold>
 
@@ -103,8 +174,8 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         onStart(this);
         this.activeWindow = nextWindow;
         nextWindow = null;
-
-        setSize(width, height);
+        activeWindow.setSizeChangeListener(windowSizeChangeListener);
+        refreshWindowSize();
 
         // add listener for window closing
         addWindowListener(new WindowAdapter() {
@@ -155,43 +226,7 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     }
 
 
-    /**
-     * Invoked by Swing to draw components.
-     * Applications should not invoke <code>paint</code> directly,
-     * but should instead use the <code>repaint</code> method to
-     * schedule the component for redrawing.
-     * <p>
-     * This method actually delegates the work of painting to three
-     * protected methods: <code>paintComponent</code>,
-     * <code>paintBorder</code>,
-     * and <code>paintChildren</code>.  They're called in the order
-     * listed to ensure that children appear on top of component itself.
-     * Generally speaking, the component and its children should not
-     * paint in the insets area allocated to the border. Subclasses can
-     * just override this method, as always.  A subclass that just
-     * wants to specialize the UI (look and feel) delegate's
-     * <code>paint</code> method should just override
-     * <code>paintComponent</code>.
-     *
-     * @param g the <code>Graphics</code> context in which to paint
-     * @see #repaint
-     */
-    @Override
-    public void paint(Graphics g) {
-        // create buffer to prevent issues with windows
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D bufferGraphic = bufferedImage.createGraphics();
-        super.paint(bufferGraphic);
-        if (validateWindow())
-            activeWindow.paint(bufferGraphic);
-        g.drawImage(bufferedImage, 0, 0, null);
 
-        // see if new window has been assigned
-        if(nextWindow != null) {
-            activeWindow = nextWindow;
-            nextWindow = null;
-        }
-    }
 
     /**
      * Backend method for delegating actions to be taken on a tick update.
@@ -244,6 +279,16 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
         this.nextWindow = nextWindow;
     }
 
+    /**
+     * Sets the application's default size. This is used when the displayed {@link Window} is null or when the Window has
+     * no set size of it's own.
+     * @param width
+     * @param height
+     */
+    public void setDefaultSize(int width, int height) {
+        this.defaultWidth = width;
+        this.defaultHeight = height;
+    }
 
     /**
      * Invoked when the mouse button has been clicked (pressed
@@ -285,6 +330,27 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
     private boolean validateWindow() {
         return activeWindow != null;
     }
+
+    /**
+     * Refreshes the application's window size.
+     */
+    private void refreshWindowSize() {
+        if (validateWindow()) {
+            if (activeWindow.getHeight() != 0 && activeWindow.getWidth() != 0) {
+                currentWidth = activeWindow.getWidth();
+                currentHeight = activeWindow.getHeight();
+            } else {
+                currentWidth = defaultWidth;
+                currentHeight = defaultHeight;
+            }
+        } else {
+            currentWidth = defaultWidth;
+            currentHeight = defaultHeight;
+        }
+
+        setSize(currentWidth, currentHeight);
+    }
+
     /**
      * Invoked when a mouse button has been released on a component.
      *

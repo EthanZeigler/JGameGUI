@@ -14,20 +14,20 @@ import java.util.List;
  * clickable area will still exist.</p>
  */
 public class ButtonImageElement extends ImageElement implements Sized {
-    private double width, height;
-    private List<ButtonClickListener> clickListeners = new ArrayList<>();
+    protected double width, height;
+    protected List<ButtonClickListener> clickListeners = new ArrayList<>();
 
     /**
      * An ImageElement that listens for clicks on it.
      * @param resPath The path to the image resource to display
      * @param xOrig the x origin
      * @param yOrig the y origin
-     * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      * @param width the clickable area's width
      * @param height the clickable area's height
+     * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      */
-    public ButtonImageElement(@Nullable String resPath, double xOrig, double yOrig, int priority, double width, double height) {
-        this(JGameGUI.loadImageFromFile(resPath), xOrig, yOrig, priority, width, height);
+    public ButtonImageElement(@Nullable String resPath, double xOrig, double yOrig, double width, double height, int priority) {
+        this(JGameGUI.loadImageFromFile(resPath), xOrig, yOrig, width, height, priority);
     }
 
     /**
@@ -35,11 +35,11 @@ public class ButtonImageElement extends ImageElement implements Sized {
      * @param icon The ImageIcon to display
      * @param xOrig the x origin
      * @param yOrig the y origin
-     * @param priority An ImageElement that listens for clicks on it.
      * @param width the clickable area's width
      * @param height the clickable area's height
+     * @param priority An ImageElement that listens for clicks on it.
      */
-    public ButtonImageElement(@Nullable ImageIcon icon, double xOrig, double yOrig, int priority, double width, double height) {
+    public ButtonImageElement(@Nullable ImageIcon icon, double xOrig, double yOrig, double width, double height, int priority) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;
