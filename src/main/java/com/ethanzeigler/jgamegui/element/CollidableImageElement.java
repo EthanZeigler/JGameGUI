@@ -39,7 +39,7 @@ public class CollidableImageElement extends ImageElement implements Sized {
      * @param height the collision area's height
      * @param priority the drawing priority. The higher the priority, the later it is drawn, and over others with lower priorities
      */
-    public CollidableImageElement(ImageIcon icon, double xOrig, double yOrig, double height, double width, int priority) {
+    public CollidableImageElement(ImageIcon icon, double xOrig, double yOrig, double width, double height, int priority) {
         super(icon, xOrig, yOrig, priority);
         this.width = width;
         this.height = height;

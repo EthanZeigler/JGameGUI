@@ -15,6 +15,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.net.URL;
 
 /**
  * A Java Swing game API designed and created by Ethan Zeigler, class of '16.
@@ -385,9 +387,12 @@ public abstract class JGameGUI extends JFrame implements MouseListener, MouseMot
      * @return the ImageIcon if found
      */
     public static ImageIcon loadImageFromFile(String filePath) {
-        if (filePath == null)
-            return null;
+        if (filePath == null) throw new NullPointerException("Input cannot be null");
+        URL url = JGameGUI.class.getResource("/" + filePath);
 
+        if (url == null) throw new RuntimeException(
+                new FileNotFoundException("File \"/" + filePath + "\" does not exist. " +
+                        "Check and make sure that the desired file is at this location after compiling."));
         return new ImageIcon(JGameGUI.class.getResource("/" + filePath));
     }
 
